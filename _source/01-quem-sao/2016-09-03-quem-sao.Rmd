@@ -53,6 +53,7 @@ kable(vereadores_suplentes)
 ```
 
 <br>
+
 Claro, também olhamos os dados demográficos deles [em nossa segunda análise](/2016/09/como-sao.html).
 
 ### E por que 23 vereadores?
