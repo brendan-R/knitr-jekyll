@@ -1,0 +1,126 @@
+---
+layout: post
+title:  "Como vivem?"
+published: true
+date: `r Sys.time()`
+categories: [análise]
+tags: [demograficos, representatividade]
+---
+
+```{r include=FALSE}
+# Incluir em todos os posts
+knitr::opts_chunk$set(screenshot.force = FALSE)
+```
+
+
+```{r setup, include=FALSE}
+VEREADORES_DIR="/Users/nazareno/workspace/vereadorescg/R"
+
+knitr::opts_chunk$set(echo = FALSE) 
+library(ggplot2)
+library(RPostgreSQL)
+library(plotly, warn.conflicts = F)
+library(lubridate, warn.conflicts = F)
+library(dplyr, warn.conflicts = F)
+library(readr)
+library(knitr)
+library(highcharter)
+library(stringi)
+
+anterior = getwd()
+setwd(VEREADORES_DIR)
+source("vereadores_logic.R")
+source("data_access.R")
+source("server.R")
+setwd(anterior) 
+theme_set(theme_minimal())
+
+camara_db <- start_camara_db()
+```
+
+
+```{r carrega, include=FALSE}
+vereadores = get_vereadores(camara_db) %>%
+  mutate(eleito = ifelse(
+    grepl("^ELEITO", desc_sit_tot_turno),
+    "Eleito",
+    "Suplente"
+    ),
+    sexo = descricao_sexo) 
+
+simpleCap <- function(x) {
+  s <- strsplit(x, " ")[[1]]
+  paste(toupper(substring(s, 1,1)), tolower(substring(s, 2)),
+      sep="", collapse=" ")
+}
+
+vereadores = vereadores %>% 
+  mutate_at(vars(matches("nome|desc|sexo")), function(x) sapply(x, simpleCap))
+```
+
+### Gênero, número e grau de formação
+
+Infelizmente, **todos os 23 vereadores eleitos para a legislatura 2013-2016 são homens**. Não há mulheres. Entre os suplentes que assumiram, três mulheres foram ou são vereadoras. 
+
+```{r echo=FALSE}
+sumario <- count(vereadores, eleito, sexo) %>% ungroup()
+sumario = rbind(sumario, ## TODO substituir isso por expand.grid
+                data.frame(sexo = c("Feminino"), 
+                           eleito = c("Eleito"), 
+                           n = c(0)))
+
+sumario = arrange(sumario, c(1, 3, 4, 2)) 
+  
+p = hchart(sumario, "column", x = eleito, y = n, group = sexo) %>% 
+  hc_yAxis(title = "") %>% 
+  hc_xAxis(title = "") %>% 
+  hc_title(text = "Vereadores eleitos e suplentes por gênero")
+p
+```
+
+Olhando o grau de formação, vemos que um terço daqueles que atuaram como vereadores nessa última legislatura têm curso superior completo. O grau de escolaridade mais comum é o Ensino Médio completo (45% dos que nos representaram).
+
+```{r}
+sumario <- vereadores %>% 
+  mutate(
+    descricao_grau_instrucao = ifelse(
+      descricao_grau_instrucao == "Ensino Médio Incompleto",
+      "Ensino Fundamental Completo",
+      ifelse(
+        descricao_grau_instrucao == "Superior Incompleto",
+        "Ensino Médio Completo",
+        descricao_grau_instrucao
+      )
+    )
+  ) %>% 
+  count(eleito, descricao_grau_instrucao) %>% ungroup()
+
+sumario = arrange(sumario, c(12, 11, 13, 14 , 2, 1, 3, 4))
+
+p = hchart(sumario, "column", x = descricao_grau_instrucao, y = n, group = eleito) %>% 
+  hc_plotOptions(column = list(stacking = "normal")) %>% 
+  hc_yAxis(title = "") %>% 
+  hc_xAxis(title = "") %>% 
+  hc_title(text = "Grau de formação") %>% 
+  hc_colors(c("darkblue", "orange"))
+  # hc_add_theme(hc_theme_smpl())
+p
+```
+
+
+```{r}
+sumario <- vereadores %>% 
+  count(descricao_ocupacao) %>% 
+  arrange(-n) %>% 
+  rename(`Ocupação` = descricao_ocupacao, `Quantos` = n )
+```
+
+Já quanto à ocupação que nossos representantes municipais declararam quando se candidataram, há uma tendência clara: a ocupação mais comum dos candidatos é... vereador. Embora vereador não seja uma profissão, uma parte dessas respostas pode se dever ao fato de que os vereadores tipicamente tentam reeleição. Atualmente, todos na câmara tentam, por exemplo. 
+
+```{r results='asis'}
+kable(sumario) 
+```
+
+<br> 
+
+Depois de vereador, a ocupaçõa mais comum de nossos eleitos é comerciante. 

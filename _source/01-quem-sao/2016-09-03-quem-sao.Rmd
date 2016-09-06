@@ -1,0 +1,62 @@
+---
+layout: post
+title:  "Quem são?"
+published: true
+date: `r Sys.time()`
+categories: [análise]
+tags: [knitr, servr, httpuv, websocket]
+---
+
+```{r include=FALSE}
+# Incluir em todos os posts
+knitr::opts_chunk$set(screenshot.force = FALSE)
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE) 
+library(dplyr, warn.conflicts = F)
+library(readr)
+library(knitr)
+library(stringi)
+
+vereadores_eleitos <- read_csv("mandato_2012_vereadores_eleitos_img.csv", 
+                               col_types = cols(.default = "c"))
+vereadores_eleitos[is.na(vereadores_eleitos)] <- ""
+
+vereadores_suplentes <- read_csv("mandato_2012_vereadores_suplentes_img.csv", 
+                                 col_types = cols(.default = "c"))
+vereadores_suplentes[is.na(vereadores_suplentes)] <- ""
+```
+
+A câmara de vereadores de Campina Grande tem **23 vereadores** no mandato de 2013-2016. Esses vereadores são os responsáveis pelo poder legislativo municipal e por instruir e fiscalizar o poder executivo, que é representado pelo prefeito. Isso significa que os vereadores fazem as leis municipais, parte do orçamento municipal e pedem ações para os demais órgãos do município. 
+
+Além dos 23 vereadores atuantes em um momento, todos os demais candidatos com ao menos um voto compõem a lista de *suplentes*, ou substitutos. Eles são escolhidos para tomar posse temporária ou definitivamente em casos de afastamento de algum dos 23 atuantes. Em Campina Grande, até setembro de 2016, **13 suplentes** tomaram posse pelo menos uma vez.
+
+Uma boa forma de começar a conhecer nossos atuais representantes é ligando os nomes aos rostos:
+ 
+
+```{r results='asis', fig.width = 1.8}
+kable(vereadores_eleitos) 
+```
+
+<br>
+
+Como as aparências não dizem tudo, em outra análise olhamos também outros dados sobre [esses políticos antes da eleição](/2016/09/como-sao.html).
+
+### Suplentes que assumiram
+
+Além desses 23, eis os suplentes que em algum momento assumiram como vereadores em nossa câmara:
+
+```{r results='asis', fig.width = 1.8}
+kable(vereadores_suplentes)
+```
+
+<br>
+Claro, também olhamos os dados demográficos deles [em nossa segunda análise](/2016/09/como-sao.html).
+
+### E por que 23 vereadores?
+
+O tamanho da população da cidade define a quantidade de vereadores de sua Câmara. Campina Grande tem **385.213 habitantes** (pelo [Censo de 2010](http://www.ibge.gov.br/home/estatistica/populacao/censo2010/), sendo assim ela encaixa-se na faixa de 300.000 até 450.000 definida pela Constituição Federal (Artigo 29-A), e tem obrigatoriamente **23 vereadores**.
+
+Até 2009 as regras [eram outras](http://www2.camara.leg.br/documentos-e-pesquisa/publicacoes/estnottec/areas-da-conle/tema6/2010_10930.pdf), e diziam que municípios que tem menos de 1 Milhão de habitantes podem ter no mínimo 9 e no máximo 21 vereadores. Campina tinha 16. Com a [mudança de regra](http://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc58.htm), Campina subitamente ganhou 7 vereadores.
