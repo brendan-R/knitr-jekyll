@@ -78,6 +78,18 @@ p = hchart(sumario, "column", x = eleito, y = n, group = sexo) %>%
 p
 ```
 
+Quanto à idade, temos metade de nossos representantes com 50 anos ou mais, e apenas dois vereadores com menos de 30 anos.
+
+```{r}
+idades = 2016 - year(dmy(vereadores$data_nascimento))
+hchart(idades, color = "#B71C1C", name = "Idade") %>% 
+  hc_yAxis(title = "Quantidade nessa faixa") %>% 
+  hc_xAxis(title = "Faixa etária") %>% 
+  hc_title(text = "Idade de nossos representantes")
+```
+
+
+
 Olhando o grau de formação, vemos que um terço daqueles que atuaram como vereadores nessa última legislatura têm curso superior completo. O grau de escolaridade mais comum é o Ensino Médio completo (45% dos que nos representaram).
 
 ```{r}
@@ -124,3 +136,45 @@ kable(sumario)
 <br> 
 
 Depois de vereador, a ocupaçõa mais comum de nossos eleitos é comerciante. 
+
+### Partido
+
+Finalmente, a coligação e o partido de nossos vereadores é um dado importante. Clicando nas coligações na figura abaixo você pode explorar a distribuição dos partidos dos vereadores eleitos. 
+
+```{r include=FALSE}
+library("treemap")
+
+v = vereadores %>% 
+  filter(eleito == "Eleito") %>% 
+  count(nome_legenda, sigla_partido)
+
+tm <- treemap(v, index = c("nome_legenda", "sigla_partido"),
+              vSize = "n", vColor = "nome_legenda")
+```
+
+
+```{r}
+hc_tm <- highchart() %>% 
+  hc_add_series_treemap(tm, allowDrillToNode = TRUE,
+                       layoutAlgorithm = "squarified",
+                       name = "tmdata") %>% 
+  hc_title(text = "Eleitos por coligação e partido") %>% 
+  hc_tooltip(pointFormat = "<b>{point.name}</b>:<br>
+             Eleitos: {point.value:,.0f}")
+
+hc_tm
+```
+
+O partido com maior número de eleitos é o PMDB. Em segundo lugar, com três candidatos temos o PMDB e curiosamente o PMN, o Partido da Mobilização Nacional, um partido que não tem deputados estaduais ou federais na Paraíba. Os três deputados desta legenda são Rodrigo Ramos, Sgt Regis e Galego do Leite. 
+
+Sobre os demais, eis os partidos de todos: 
+
+```{r results='asis'}
+vereadores %>% 
+  filter(eleito == "Eleito") %>% 
+  select(nome_urna_candidato, sigla_partido, nome_legenda) %>% 
+  arrange(nome_legenda, sigla_partido) %>%
+  rename("Eleito" = nome_urna_candidato, "Partido" = sigla_partido, "Coligação" = nome_legenda) %>% 
+  kable()
+```
+
