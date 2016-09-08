@@ -5,8 +5,7 @@ description: > # this means to ignore newlines until "baseurl:"
   Quem são nossos vereadores? O que fazem? Onde vivem, e do que se alimentam?.
 baseurl: "/vereadorescg-site/" # the subpath of your site, e.g. /blog/
 url: "http://nazareno.github.io" # the base hostname & protocol for your site
-twitter_username: zananeno
-github_username:  nazareno
+github_username:  analytics-ufcg
 permalink: /:year/:month/:title.html
 
 # Build settings

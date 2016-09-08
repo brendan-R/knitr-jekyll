@@ -2,9 +2,9 @@
 layout: post
 title:  "Quem são?"
 published: true
-date: `r Sys.time()`
+date: 2016-09-07
 categories: [análise]
-tags: [knitr, servr, httpuv, websocket]
+tags: [vereadores, fotos]
 ---
 
 ```{r include=FALSE}

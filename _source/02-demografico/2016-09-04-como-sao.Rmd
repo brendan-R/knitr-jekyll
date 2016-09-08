@@ -2,7 +2,7 @@
 layout: post
 title:  "Como vivem?"
 published: true
-date: `r Sys.time()`
+date: 2016-09-06
 categories: [análise]
 tags: [demograficos, representatividade]
 ---
@@ -26,6 +26,7 @@ library(readr)
 library(knitr)
 library(highcharter)
 library(stringi)
+library(DT)
 
 anterior = getwd()
 setwd(VEREADORES_DIR)
@@ -130,7 +131,7 @@ sumario <- vereadores %>%
 Já quanto à ocupação que nossos representantes municipais declararam quando se candidataram, há uma tendência clara: a ocupação mais comum dos candidatos é... vereador. Embora vereador não seja uma profissão, uma parte dessas respostas pode se dever ao fato de que os vereadores tipicamente tentam reeleição. Atualmente, todos na câmara tentam, por exemplo. 
 
 ```{r results='asis'}
-kable(sumario) 
+datatable(sumario, options = list(pageLength = 15), rownames = FALSE)
 ```
 
 <br> 
@@ -162,7 +163,7 @@ hc_tm <- highchart() %>%
   hc_tooltip(pointFormat = "<b>{point.name}</b>:<br>
              Eleitos: {point.value:,.0f}")
 
-hc_tm
+hc_tm 
 ```
 
 O partido com maior número de eleitos é o PMDB. Em segundo lugar, com três candidatos temos o PMDB e curiosamente o PMN, o Partido da Mobilização Nacional, um partido que não tem deputados estaduais ou federais na Paraíba. Os três deputados desta legenda são Rodrigo Ramos, Sgt Regis e Galego do Leite. 
@@ -175,6 +176,6 @@ vereadores %>%
   select(nome_urna_candidato, sigla_partido, nome_legenda) %>% 
   arrange(nome_legenda, sigla_partido) %>%
   rename("Eleito" = nome_urna_candidato, "Partido" = sigla_partido, "Coligação" = nome_legenda) %>% 
-  kable()
+  datatable(options = list(pageLength = 25), rownames = FALSE)
 ```
 
