@@ -1,0 +1,11 @@
+"treemap"
+DT
+RPostgreSQL
+dplyr
+ggplot2
+highcharter
+knitr
+lubridate
+plotly
+readr
+stringi
