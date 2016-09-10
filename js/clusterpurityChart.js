@@ -11,9 +11,9 @@ refazSvg = function() {
     	ultimoIgnorarRequerimento = ignorarRequerimentos;
     	ultimoAFazer = aFazeres.options[aFazeres.selectedIndex].value;
     	d3.select("#cluster").selectAll("*").remove();
-      
+
       	//criar filtro
-    	d3.json('http://web.cloud.lsd.ufcg.edu.br:44142/vereadores/ementas/sumario',function(error,data){
+    	d3.json('https://wwws.cloud.lsd.ufcg.edu.br:44142/vereadores/ementas/sumario',function(error,data){
 			var quantNos = data[ultimoAFazer][0]["values"].length;
 			obj = clusterchart().containerID('cluster').noOfCategories(quantNos);
 			d3.select('#cluster').append('svg').datum(data[ultimoAFazer]).call(obj);
@@ -44,17 +44,17 @@ clusterchart = function(){
 
 	var custLayout = custumPieLayout()
 						.sort(null)
-						.value(function(d) {				    	
-			    			return d.n; 
+						.value(function(d) {
+			    			return d.n;
 			    		});
 
 	var arc = d3.svg.arc()
-			  .innerRadius(innerRadius);		
+			  .innerRadius(innerRadius);
 
 	var chart = function(selection){
-				
+
 				custLayout.fixAngle((360/(noOfCategories- legendFilter.length))/(360/(2*Math.PI)));
-				
+
 				width = parseInt(d3.select('#'+containerID).style('width'));
 				height = parseInt(d3.select('#'+containerID).style('height'));
 
@@ -78,7 +78,7 @@ clusterchart = function(){
 					    width = width - 100;
 					var temp_width = data.length > eleInRow?width-0.5*(width/eleInRow):width;
 						circleR = d3.min([temp_width,(height-margin.top)])/eleInRow;
-					var x_offset = 0,y_offset=0;			
+					var x_offset = 0,y_offset=0;
 
 						radiusScale
 							.domain([0,d3.extent(data,function(d){ return d.total[0]})[1]])
@@ -88,13 +88,13 @@ clusterchart = function(){
 
 						container.attr('width',(circleR*eleInRow+0.5*circleR)+400)
 								.attr('height',circleR*eleInRow + margin.top)
-						
+
 						if(!ParentG){
 							ParentG = container.append('g').attr('class','parentG')
 												.attr('transform','translate('+(data.length > eleInRow?0.5*circleR:0)+','+margin.top+')');
 							LegendG = container.append('g').attr('class','legendG');
 						}
-						
+
 						LegendG.attr('transform','translate('+(width+50)+','+((circleR*eleInRow/2)-(Object.keys(colorMap).length*20)/2)+')')
 								.datum(colorMap)
 								.call(legendObj);
@@ -108,7 +108,7 @@ clusterchart = function(){
 													return 1;
 												else if(a.total[0] > b.total[0])
 													return -1;
-												else 
+												else
 													return 0;
 												})
 										);
@@ -128,7 +128,7 @@ clusterchart = function(){
 							.style('stroke-width','1px');
 
 						circleG.exit().transition().duration(0).remove();
-						
+
 						circleG
 							.attr('transform',function(d,i){
 								if(Math.floor(i/eleInRow)%2 === 1){
@@ -141,10 +141,10 @@ clusterchart = function(){
 										y_offset = 0;
 									else
 										y_offset = 0.13*circleR*Math.floor(i/eleInRow);
-								}					
+								}
 								return 'translate('+(((i%eleInRow)*(circleR))-x_offset)+','+((Math.floor(i/eleInRow)*circleR)-y_offset)+')';
 							});
-						
+
 						circleG
 							.selectAll('circle')
 							.attr('r',0)
@@ -279,9 +279,9 @@ custumPieLayout = function(){
 	var pieLayoutObj = function(startAngle,endAngle,padAngle,value,data){
 							this.startAngle =startAngle;
 							this.endAngle =endAngle;
-							this.padAngle = padAngle;		
+							this.padAngle = padAngle;
 							this.value = value;
-							this.data = data; 
+							this.data = data;
 						};
 
 	var layout = function(data){
@@ -313,8 +313,8 @@ custumPieLayout = function(){
 	}
 	layout.value = function(_){
 		if(typeof _ !== 'function'){
-			return;	
-		} 
+			return;
+		}
 		valueFun = _;
 		return layout;
 	}
@@ -348,7 +348,7 @@ custumPieLayout = function(){
                 			.attr('transform','translate(10,30)');
 
                 var g_ci = g.selectAll('circle')
-                    .data(function(d){  
+                    .data(function(d){
                     	return Object.keys(d)
                     });
 
@@ -365,7 +365,7 @@ custumPieLayout = function(){
                         return 0;
                     })
                     .attr('cy',function(d,i){
-                        
+
                         return Math.floor(i)*30;
                     })
                     .on('mouseout',function(d){
@@ -404,7 +404,7 @@ custumPieLayout = function(){
                         return 0;
                     })
                     .attr('cy',function(d,i){
-                        
+
                         return Math.floor(i)*30;
                     });
 
@@ -423,8 +423,8 @@ custumPieLayout = function(){
                     .attr('x',function(d,i){
                         return 30;
                     })
-                    .attr('y',function(d,i){ 
-                   			return i*30+5; 		
+                    .attr('y',function(d,i){
+                   			return i*30+5;
                     })
 
             });
