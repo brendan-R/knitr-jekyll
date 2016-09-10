@@ -1,19 +1,35 @@
 # Nossos Vereadores
 
 ## Dependências
+### Backend
 
-### R
+R (>3.3):
 
-> ./install_r_dependencies.R
+```
+# Necessário em máquinas ubuntu para instalar o R > 3.3
+echo 'deb http://cran.rstudio.com/bin/linux/ubuntu trusty/' | sudo tee /etc/apt/sources.list.d/diferentonas.list
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 
-### Jekyll
+sudo apt-get -y update
+sudo apt-get -y install r-base
 
-> TODO
+# necessários para alguns dos pacotes que instalaremos
+sudo apt-get -y install libcurl4-openssl-dev
+sudo apt-get -y install libpq-dev
+```
 
-## Desevolvimento
+Instalar pacotes que usamos:
 
-## Executar/Editar/Criar Posts com R/RStudio
+> ./r_deps_install.R
 
-Vá para o diretório raiz e execute:
+### Frontend
+
+> bundle install
+
+Servir via *RStudio*
 
 > brocks::blog_serve()
+
+Servir via *Linha de Comando*
+
+> Rscript -e 'brocks::blog_serve()'
