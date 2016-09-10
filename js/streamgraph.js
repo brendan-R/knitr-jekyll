@@ -104,7 +104,7 @@ var svg = d3.select("#stream").append("svg")
                 'class': 'streamchart'
             })
             .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")") 
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
             .call(zoom);
 
  var chart = svg.append('g').attr('id', 'g-chart');
@@ -120,7 +120,7 @@ document.getElementById("aFazeres").onclick = function() {
     if(aFazeres.options[aFazeres.selectedIndex].value != ultimoAFazer){
       ultimoAFazer = aFazeres.options[aFazeres.selectedIndex].value;
       d3.select("#g-chart").selectAll("*").remove();
-      createGraph("http://web.cloud.lsd.ufcg.edu.br:44142/ementas/contagem?count_by="+aFazeres.options[aFazeres.selectedIndex].value);
+      createGraph("https://wwws.cloud.lsd.ufcg.edu.br:44142/ementas/contagem?count_by="+aFazeres.options[aFazeres.selectedIndex].value);
     }
 };
 
@@ -142,7 +142,7 @@ function createGraph(request){
 
     x.domain(d3.extent(data, function(d) { return d.date; }));
     y.domain([0, d3.max(data, function(d) { return d.y0 + d.y; })]);
-    
+
     var invertedx = "";
 
     chart.selectAll(".layer")
@@ -183,9 +183,9 @@ function createGraph(request){
         d3.select(this)
         .classed("hover", true)
         .attr("stroke", strokecolor)
-        .attr("stroke-width", "0.5px"), 
+        .attr("stroke-width", "0.5px"),
         tooltip.html( "<p>" + d.key + "<br>quant: " + pro + "<br>data: "+invertedx+"</p>" ).style("visibility", "visible");
-        
+
       })
       .on("mouseout", function(d, i) {
        chart.selectAll(".layer")
@@ -213,12 +213,12 @@ function createGraph(request){
         d3.select(this)
         .classed("hover", true)
         .attr("stroke", strokecolor)
-        .attr("stroke-width", "0.5px"), 
+        .attr("stroke-width", "0.5px"),
         tooltip.html( "<p>" + d.key + "<br>quant: " + pro + "<br>data: "+invertedx+"</p>" ).style("visibility", "visible");
-        
+
       })
-    
+
   });
   }
-  createGraph("http://web.cloud.lsd.ufcg.edu.br:44142/ementas/contagem?count_by=tipo");
+  createGraph("https://wwws.cloud.lsd.ufcg.edu.br:44142/ementas/contagem?count_by=tipo");
 }
