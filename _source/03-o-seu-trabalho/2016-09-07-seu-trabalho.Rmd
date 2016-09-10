@@ -14,7 +14,7 @@ knitr::opts_chunk$set(screenshot.force = FALSE)
 
 
 ```{r setup, include=FALSE}
-VEREADORES_DIR="/Users/nazareno/workspace/vereadorescg/R"
+VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
 
 knitr::opts_chunk$set(echo = FALSE) 
 library(ggplot2)
@@ -28,7 +28,7 @@ library(highcharter)
 library(stringi)
 
 anterior = getwd()
-setwd(VEREADORES_DIR)
+setwd(VEREADOR_DIR)
 source("vereadores_logic.R")
 source("data_access.R")
 source("server.R")

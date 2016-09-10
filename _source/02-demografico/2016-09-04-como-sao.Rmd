@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Como vivem?"
+title:  "Como são?"
 published: true
 date: 2016-09-06
 categories: [análise]
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(screenshot.force = FALSE)
 
 
 ```{r setup, include=FALSE}
-VEREADORES_DIR="/Users/nazareno/workspace/vereadorescg/R"
+VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
 
 knitr::opts_chunk$set(echo = FALSE)
 library(ggplot2)
@@ -26,10 +26,11 @@ library(readr)
 library(knitr)
 library(highcharter)
 library(stringi)
+library(stringr)
 library(DT)
 
 anterior = getwd()
-setwd(VEREADORES_DIR)
+setwd(VEREADOR_DIR)
 source("vereadores_logic.R")
 source("data_access.R")
 source("server.R")
@@ -79,7 +80,7 @@ p = hchart(sumario, "column", x = eleito, y = n, group = sexo) %>%
 p
 ```
 
-Quanto à idade, temos metade de nossos representantes com 50 anos ou mais, e apenas dois vereadores com menos de 30 anos.
+Quanto à idade, vemos que a maioria dos nossos representantes tem cerca de 50 anos, apenas dois vereadores com menos de 30 anos (Anderson Maia e Bruno Cunha Lima) e um com mais de 70 (Orlandino Farias).
 
 ```{r}
 idades = 2016 - year(dmy(vereadores$data_nascimento))
@@ -134,14 +135,14 @@ datatable(sumario, options = list(pageLength = 15), rownames = FALSE)
 
 <br> 
 
-Depois de vereador, a ocupaçõa mais comum de nossos eleitos é comerciante. 
+Depois de vereador, a ocupação mais comum de nossos eleitos é comerciante. 
 
 ### Partido
 
 Finalmente, a coligação e o partido de nossos vereadores é um dado importante. Clicando nas coligações na figura abaixo você pode explorar a distribuição dos partidos dos vereadores eleitos. 
 
 ```{r include=FALSE}
-library("treemap")
+library(treemap)
 
 v = vereadores %>% 
   filter(eleito == "Eleito") %>% 
@@ -172,6 +173,7 @@ Sobre os demais, eis os partidos de todos:
 vereadores %>% 
   filter(eleito == "Eleito") %>% 
   select(nome_urna_candidato, sigla_partido, nome_legenda) %>% 
+  mutate(nome_legenda = nome_legenda %>% str_replace_all("Iii", "III") %>% str_replace_all("Ii", "II")) %>% 
   arrange(nome_legenda, sigla_partido) %>%
   rename("Eleito" = nome_urna_candidato, "Partido" = sigla_partido, "Coligação" = nome_legenda) %>% 
   datatable(options = list(pageLength = 25), rownames = FALSE)
