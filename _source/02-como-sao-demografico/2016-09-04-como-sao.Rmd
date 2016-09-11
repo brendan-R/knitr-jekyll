@@ -2,7 +2,7 @@
 layout: post
 title:  "Como são?"
 published: true
-date: 2016-09-06
+date: 2016-09-10
 categories: [análise]
 tags: [demograficos, representatividade]
 ---

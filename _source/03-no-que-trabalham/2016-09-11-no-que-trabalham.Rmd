@@ -2,7 +2,7 @@
 layout: post
 title:  "No que trabalham?"
 published: true
-date: 2016-09-11
+date: 2016-09-09
 categories: [análise]
 tags: [atos]
 ---
