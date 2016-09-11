@@ -1,0 +1,95 @@
+---
+layout: post
+title:  "No que trabalham?"
+published: true
+date: 2016-09-11
+categories: [análise]
+tags: [atos]
+---
+
+```{r include=FALSE}
+# Incluir em todos os posts
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
+```
+
+```{r setup, include=FALSE}
+VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
+
+library(ggplot2)
+library(RPostgreSQL)
+library(dplyr, warn.conflicts = F)
+library(plotly, warn.conflicts = F)
+library(DT)
+
+anterior = getwd()
+setwd(VEREADOR_DIR)
+source("vereadores_logic.R")
+source("data_access.R")
+source("server.R")
+setwd(anterior) 
+source("site-lib.R")
+theme_set(theme_minimal(16))
+
+camara_db <- start_camara_db()
+vereadores = get_vereadores_para_ui(camara_db)
+ementas = get_ementas_all(camara_db, not_older_than = 2013)
+
+epv = data.frame()
+for (v in vereadores$sequencial_candidato) {
+  desse_vereador = get_ementas_por_vereador(camara_db, v, 2012)
+  epv = rbind(epv, desse_vereador)
+}
+epv = epv %>% filter(proponents != "Romero Rodrigues Veiga")
+```
+
+Boa parte da atuação de nossos vereadores se concentra em apresentar propostas de leis ou ações para a câmara e para o poder executivo. Grosso modo, podemos observar a atuação deles em duas frentes:
+
+* **Legislativa** - com a criação e alteração de leis municipais, abrangendo desde a criação de conselhos, passando pela denominação de ruas, até diretrizes para políticas municipais, como na criação do Plano de Mobilidade de Campina Grande e;
+* **Administrativa** - fiscalizar e requisitar medidas aos órgãos da prefeitura -- por exemplo, à Secretaria de Esporte e Juventude que crie uma academia em um bairro -- ou ações interna da própria câmara, tais como votos de aplauso ou pesar. 
+
+Desde o início da atual legislatura, nossa câmara analisou mais de 10.000 proposições. A enorme maioria são atos administrativos: 
+
+```{r}
+# ementas %>% ggplot() + geom_bar(aes(x = tipo_ato, fill = tipo_ato)) + 
+#   labs(x = "", y = "Quantidade") +  theme(legend.position = "none")
+
+e = ementas %>%
+  #filter(proponents != "Romero Rodrigues Veiga") %>% # Sem Romero?
+  count(tipo_ato) %>%
+  rename("tipo" = tipo_ato, "quantos" = n)
+e$quando = "2013-2016"
+p = e %>%
+  ggplot() +
+  geom_point(aes(y = tipo, x = quando, size = quantos), colour = "darkblue", alpha = .8) +
+  scale_radius(range = c(5, 40)) +
+  labs(x = "", y = "")
+ggplotly(p)
+
+```
+
+
+
+### Quanto um vereador propõe?
+
+Abaixo vemos a quantidade de atos por vereador ordenados pelo total de proposições:
+
+```{r}
+atos_adm = epv %>%
+  filter(tipo_ato != "Legislativo") %>% 
+  count(nome_urna_candidato) %>% 
+  rename(adm_n = n)
+
+atos_leg = epv %>%
+  filter(tipo_ato == "Legislativo") %>% 
+  count(nome_urna_candidato) %>% 
+  rename(leg_n = n)
+
+atos_adm %>% 
+  inner_join(atos_leg, by = "nome_urna_candidato") %>% 
+  mutate(Total = adm_n + leg_n) %>% 
+  arrange(desc(Total)) %>% 
+  rename("Vereador" = nome_urna_candidato, "Atos Adiministrativos" = adm_n, "Atos Legislativos" = leg_n) %>% 
+  datatable(options = list(searching = F, pageLength = 10, info = F), escape = F)
+```
+
+<!-- Seria muito bom também olhar os votos.  -->

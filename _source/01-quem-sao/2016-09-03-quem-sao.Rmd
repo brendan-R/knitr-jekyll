@@ -10,12 +10,11 @@ tags: [vereadores, fotos]
 
 ```{r include=FALSE}
 # Incluir em todos os posts
-knitr::opts_chunk$set(screenshot.force = FALSE)
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
 ```
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE) 
 library(dplyr, warn.conflicts = F)
 library(readr)
 library(knitr)
