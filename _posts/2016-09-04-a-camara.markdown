@@ -1,7 +1,0 @@
----
-title:  "O perfil por vereador"
-subtitle: "O que os vereadores andam votando na câmara."
-date:   2016-09-04 12:12:12
----
-
-{% include clusteringChart.html %}
