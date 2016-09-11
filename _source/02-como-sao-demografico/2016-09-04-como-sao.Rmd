@@ -9,14 +9,13 @@ tags: [demograficos, representatividade]
 
 ```{r include=FALSE}
 # Incluir em todos os posts
-knitr::opts_chunk$set(screenshot.force = FALSE)
+# Incluir em todos os posts
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
 ```
-
 
 ```{r setup, include=FALSE}
 VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
 
-knitr::opts_chunk$set(echo = FALSE)
 library(ggplot2)
 library(RPostgreSQL)
 library(plotly, warn.conflicts = F)
