@@ -9,6 +9,10 @@
     padding: $spacing-unit/2 $spacing-unit*2;
     // Positioning context for the mobile navigation icon
     position: relative;
+
+    @include media-query($on-palm) {
+      padding: 0 $spacing-unit/2;
+    }
 }
 
 .site-title {
@@ -20,6 +24,10 @@
     color: #fff;
     text-decoration: none;
 
+    @include media-query($on-palm) {
+      font-size: 18px;
+    }
+
     &,
     &:visited {
         color: #fff;
@@ -28,6 +36,10 @@
     > small {
       font-size: 16px;
       color: #eee;
+
+      @include media-query($on-palm) {
+        font-size: 12px;
+      }
     }
 }
 
@@ -174,6 +186,10 @@
   padding: $spacing-unit*3;
   background-color: $brand-color;
   color: #fff;
+
+  @include media-query($on-palm) {
+    padding: $spacing-unit;
+  }
 }
 
 .page-content {
@@ -187,14 +203,26 @@
     margin: 0;
     padding: $spacing-unit 0;
     border-bottom: solid 2px #fff;
+
+    @include media-query($on-palm) {
+      font-size: 32px;
+    }
 }
 
 .page-subheading {
-  font-size: 24px;
+  margin-top: $spacing-unit;
+  font-size: 18px;
 }
 
 .post {
   padding-top: $spacing-unit;
+
+  a {
+    &:hover {
+      text-decoration: underline;
+    }
+
+  }
 }
 
 .post-list {
@@ -208,6 +236,8 @@
     > li {
       float: left;
       width: 25%;
+      height: 240px;
+      overflow: hidden;
       margin: 0;
       padding: 0;
 
@@ -240,15 +270,25 @@
 .post-link-color2 { background-color: #e74c3c; }
 .post-link-color3 { background-color: #3498db; }
 .post-link-color4 { background-color: #1abc9c; }
+.post-link-color5 { background-color: #f39c12; }
+.post-link-color6 { background-color: #27ae60; }
 
 .post-link1 { @extend .post-link-color1; }
 .post-link2 { @extend .post-link-color2; }
 .post-link3 { @extend .post-link-color3; }
 .post-link4 { @extend .post-link-color4; }
-.post-link5 { @extend .post-link-color1; }
-.post-link6 { @extend .post-link-color2; }
-.post-link7 { @extend .post-link-color3; }
-.post-link8 { @extend .post-link-color4; }
+.post-link5 { @extend .post-link-color5; }
+.post-link6 { @extend .post-link-color6; }
+.post-link7 { @extend .post-link-color1; }
+.post-link8 { @extend .post-link-color2; }
+.post-link9 { @extend .post-link-color1; }
+.post-link10 { @extend .post-link-color2; }
+.post-link11 { @extend .post-link-color3; }
+.post-link12 { @extend .post-link-color4; }
+.post-link13 { @extend .post-link-color5; }
+.post-link14 { @extend .post-link-color6; }
+.post-link15 { @extend .post-link-color1; }
+.post-link16 { @extend .post-link-color2; }
 
 a.post-link {
   color: #fff;
@@ -257,7 +297,9 @@ a.post-link {
   > h2 {
     margin: 0;
     padding: 0;
+    padding-bottom: $spacing-unit;
     border-bottom: solid 1px #fff;
+    line-height: 1.2em;
   }
 }
 
@@ -321,4 +363,23 @@ a.post-link {
 .footnotes {
     border-top: darkgray 1px solid;
     padding-top: 1em;
+}
+
+.vereador {
+  float: left;
+  width: 20%;
+
+  > div {
+    width: 120px;
+    height: 145px;
+    overflow: hidden;
+  }
+
+  > p {
+    margin: 5px;
+    font-size: 14px;
+    line-height: 16px;
+    height: 35px;
+    overflow: hidden;
+  }
 }
