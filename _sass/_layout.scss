@@ -100,8 +100,10 @@
  * Site footer
  */
 .site-footer {
+    background-color: $background-color;
     border-top: 1px solid $grey-color-light;
-    padding: $spacing-unit 0;
+    padding: $spacing-unit*2 0;
+    color: #fff;
 }
 
 .footer-heading {
@@ -117,7 +119,6 @@
 
 .footer-col-wrapper {
     font-size: 15px;
-    color: $grey-color;
     margin-left: -$spacing-unit / 2;
     @extend %clearfix;
 }
@@ -171,21 +172,19 @@
  */
 .home {
   padding: $spacing-unit*3;
-  margin-bottom: $spacing-unit;
   background-color: $brand-color;
   color: #fff;
-
 }
 
 .page-content {
     // padding: $spacing-unit 0;
+    background-color: #fdfdfd;
 }
 
 .page-heading {
     font-size: 73px;
     line-height: 1em;
     margin: 0;
-    margin-bottom: $spacing-unit;
     padding: $spacing-unit 0;
     border-bottom: solid 2px #fff;
 }
@@ -195,17 +194,60 @@
 }
 
 .post {
-  margin-top: $spacing-unit;
+  padding-top: $spacing-unit;
 }
 
 .post-list {
-    margin-left: 0;
+    position: relative;
+    width: 100%;
+    margin: 0;
+    margin-bottom: -1px;
+    padding: 0;
     list-style: none;
 
     > li {
-        margin-bottom: $spacing-unit;
+      float: left;
+      width: 25%;
+      margin: 0;
+      padding: 0;
+
+      @include media-query($on-palm) {
+        width: 50%;
+      }
+
     }
 }
+/* slightly enhanced, universal clearfix hack */
+.clearfix:after {
+     visibility: hidden;
+     display: block;
+     font-size: 0;
+     content: " ";
+     clear: both;
+     height: 0;
+     }
+.clearfix { display: inline-block; }
+/* start commented backslash hack \*/
+* html .clearfix { height: 1%; }
+.clearfix { display: block; }
+/* close commented backslash hack */
+
+.post-link1 { background-color: #8d82c4;}
+.post-link2 { background-color: #ec8d81;}
+.post-link3 { background-color: #6fc3df;}
+.post-link4 { background-color: #87c5a4;}
+
+a.post-link {
+  color: #fff;
+  padding: $spacing-unit*2 $spacing-unit;
+
+  > h2 {
+    margin: 0;
+    padding: 0;
+    border-bottom: solid 1px #fff;
+  }
+}
+
 
 .post-meta {
     font-size: $small-font-size;

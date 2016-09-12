@@ -6,23 +6,18 @@ layout: default
 
   <div class="wrapper">
     <h1 class="page-heading">Nossos Vereadoes Campina Grande</h1>
-    <p class="page-subheading">Lorem ipsum</p>
+    <p class="">Lorem ipsum</p>
   </div>
 
 </div>
 
-<div class="wrapper">
-
-  <ul class="post-list">
-    {% for post in site.posts %}
-      <li>
+<ul class="post-list clearfix">
+  {% for post in site.posts %}
+    <li class="post-link{{ forloop.index }}">
+      <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">
         <!-- <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span> -->
-
-        <h2>
-          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-        </h2>
-      </li>
-    {% endfor %}
-  </ul>
-
-</div>
+        <h2>{{ post.title }}</h2>
+      </a>
+    </li>
+  {% endfor %}
+</ul>
