@@ -5,8 +5,8 @@
     // border-top: 5px solid $grey-color-dark;
     // border-bottom: 1px solid $grey-color-light;
     background-color: $brand-color;
-    min-height: 56px;
-
+    min-height: 65px;
+    padding: $spacing-unit/2 $spacing-unit*2;
     // Positioning context for the mobile navigation icon
     position: relative;
 }
@@ -18,10 +18,16 @@
     margin-bottom: 0;
     float: left;
     color: #fff;
+    text-decoration: none;
 
     &,
     &:visited {
         color: #fff;
+    }
+
+    > small {
+      font-size: 16px;
+      color: #eee;
     }
 }
 
@@ -163,12 +169,33 @@
 /**
  * Page content
  */
+.home {
+  padding: $spacing-unit*3;
+  margin-bottom: $spacing-unit;
+  background-color: $brand-color;
+  color: #fff;
+
+}
+
 .page-content {
-    padding: $spacing-unit 0;
+    // padding: $spacing-unit 0;
 }
 
 .page-heading {
-    font-size: 20px;
+    font-size: 73px;
+    line-height: 1em;
+    margin: 0;
+    margin-bottom: $spacing-unit;
+    padding: $spacing-unit 0;
+    border-bottom: solid 2px #fff;
+}
+
+.page-subheading {
+  font-size: 24px;
+}
+
+.post {
+  margin-top: $spacing-unit;
 }
 
 .post-list {
@@ -190,8 +217,6 @@
     color: #2980b9;
     font-size: 24px;
 }
-
-
 
 /**
  * Posts
