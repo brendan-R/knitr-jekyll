@@ -4,12 +4,9 @@
 @charset "utf-8";
 
 @import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,700);
-@import url(https://fonts.googleapis.com/css?family=Merriweather:400,300,400italic,700);
-@import url(https://fonts.googleapis.com/css?family=Raleway:400,300,100,700);
-@import url(https://fonts.googleapis.com/css?family=Sacramento);
 
 // Our variables
-$base-font-family: 'Merriweather', serif;;
+$base-font-family: 'Source Sans Pro', sans-serif;
 $base-font-size:   17px;
 $small-font-size:  $base-font-size * 0.875;
 $base-line-height: 1.71428571;
@@ -17,8 +14,8 @@ $base-line-height: 1.71428571;
 $spacing-unit:     30px;
 
 $text-color:       #111;
-$background-color: #fdfdfd;
-$brand-color:      #d35400;
+$background-color: #242943;
+$brand-color:      #242943;
 
 $grey-color:       #828282;
 $grey-color-light: lighten($grey-color, 40%);

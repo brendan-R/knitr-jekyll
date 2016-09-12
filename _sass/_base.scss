@@ -98,11 +98,18 @@ a {
 
     &:hover {
         color: $text-color;
-        text-decoration: underline;
+        text-decoration: none;
     }
 }
 
+a.inverse {
+    color: #fff;
 
+    &:hover {
+        color: $grey-color-light;
+        text-decoration: none;
+    }
+}
 
 /**
  * Blockquotes
