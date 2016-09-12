@@ -11,13 +11,17 @@ layout: default
 
 </div>
 
-<ul class="post-list clearfix">
-  {% for post in site.posts %}
-    <li class="post-link{{ forloop.index }}">
-      <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">
-        <!-- <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span> -->
-        <h2>{{ post.title }}</h2>
-      </a>
-    </li>
-  {% endfor %}
-</ul>
+<div class="home-posts">
+
+  <ul class="post-list clearfix">
+    {% for post in site.posts %}
+      <li class="post-link{{ forloop.index }}">
+        <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">
+          <!-- <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span> -->
+          <h2>{{ post.title }}</h2>
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+
+</div>
