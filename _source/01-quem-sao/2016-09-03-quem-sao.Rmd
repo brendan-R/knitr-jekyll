@@ -18,15 +18,30 @@ knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
 library(dplyr, warn.conflicts = F)
 library(readr)
 library(knitr)
+library(tidyr)
 library(stringi)
 
 vereadores_eleitos <- read_csv("mandato_2012_vereadores_eleitos_img.csv", 
+                               col_names = FALSE,
                                col_types = cols(.default = "c"))
-vereadores_eleitos[is.na(vereadores_eleitos)] <- ""
 
 vereadores_suplentes <- read_csv("mandato_2012_vereadores_suplentes_img.csv", 
                                  col_types = cols(.default = "c"))
-vereadores_suplentes[is.na(vereadores_suplentes)] <- ""
+
+vereadorimg2vector = function(vereadores_lidos){
+  v = vereadores_lidos %>% 
+    gather() %>% 
+    select(-1) %>% 
+    filter(!is.na(value)) 
+  return(v[seq(1, NROW(v), 2),])
+}
+
+vereadores_eleitos %>% 
+  vereadorimg2vector() %>% 
+  write_csv("vereadores_2012_eleitos_img-vector.csv", col_names = F)
+vereadores_suplentes %>% 
+  vereadorimg2vector() %>% 
+  write_csv("vereadores_2012_suplentes_img-vector.csv", col_names = F)
 ```
 
 A câmara de vereadores de Campina Grande tem **23 vereadores** no mandato de 2013-2016. Esses vereadores são os responsáveis pelo poder legislativo municipal e por instruir e fiscalizar o poder executivo, que é representado pelo prefeito. Isso significa que os vereadores fazem as leis municipais, parte do orçamento municipal e pedem ações para os demais órgãos do município. 
@@ -35,7 +50,6 @@ Além dos 23 vereadores atuantes em um momento, todos os demais candidatos com a
 
 Uma boa forma de começar a conhecer nossos atuais representantes é ligando os nomes aos rostos:
  
-
 ```{r results='asis', fig.width = 1.8}
 kable(vereadores_eleitos) 
 ```
