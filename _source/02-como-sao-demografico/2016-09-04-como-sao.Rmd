@@ -128,7 +128,7 @@ sumario <- vereadores %>%
 Já quanto à ocupação que nossos representantes municipais declararam quando se candidataram, há uma tendência clara: a ocupação mais comum dos candidatos é... vereador. Embora vereador não seja uma profissão, uma parte dessas respostas pode se dever ao fato de que os vereadores tipicamente tentam reeleição. Atualmente, todos na câmara tentam, por exemplo. 
 
 ```{r results='asis'}
-datatable(sumario, options = list(pageLength = 15), rownames = FALSE)
+datatable(sumario, options = list(paging = F, info = F, searching = F), rownames = FALSE)
 ```
 
 <br> 
@@ -176,6 +176,6 @@ vereadores %>%
            str_replace_all("Ii", "II")) %>% 
   arrange(nome_legenda, sigla_partido) %>%
   rename("Eleito" = nome_urna_candidato, "Partido" = sigla_partido, "Coligação" = nome_legenda) %>% 
-  datatable(options = list(pageLength = 25), rownames = FALSE)
+  datatable(options = list(paging = F, info = F), rownames = FALSE)
 ```
 
