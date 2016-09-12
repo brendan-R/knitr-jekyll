@@ -211,8 +211,12 @@
       margin: 0;
       padding: 0;
 
-      @include media-query($on-palm) {
+      @include media-query($on-laptop) {
         width: 50%;
+      }
+
+      @include media-query($on-palm) {
+        width: 100%;
       }
 
     }
@@ -232,10 +236,19 @@
 .clearfix { display: block; }
 /* close commented backslash hack */
 
-.post-link1 { background-color: #8d82c4;}
-.post-link2 { background-color: #ec8d81;}
-.post-link3 { background-color: #6fc3df;}
-.post-link4 { background-color: #87c5a4;}
+.post-link-color1 { background-color: #9b59b6; }
+.post-link-color2 { background-color: #e74c3c; }
+.post-link-color3 { background-color: #3498db; }
+.post-link-color4 { background-color: #1abc9c; }
+
+.post-link1 { @@extend .post-link-color1; }
+.post-link2 { @@extend .post-link-color2; }
+.post-link3 { @@extend .post-link-color3; }
+.post-link4 { @@extend .post-link-color4; }
+.post-link5 { @@extend .post-link-color1; }
+.post-link6 { @@extend .post-link-color2; }
+.post-link7 { @@extend .post-link-color3; }
+.post-link8 { @@extend .post-link-color4; }
 
 a.post-link {
   color: #fff;
