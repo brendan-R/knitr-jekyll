@@ -44,8 +44,9 @@ epv = epv %>% filter(proponents != "Romero Rodrigues Veiga")
 
 Boa parte da atuação de nossos vereadores se concentra em apresentar propostas de leis ou ações para a câmara e para o poder executivo. Grosso modo, podemos observar a atuação deles em duas frentes:
 
-* **Legislativa** - com a criação e alteração de leis municipais, abrangendo desde a criação de conselhos, passando pela denominação de ruas, até diretrizes para políticas municipais, como na criação do Plano de Mobilidade de Campina Grande e;
-* **Administrativa** - fiscalizar e requisitar medidas aos órgãos da prefeitura -- por exemplo, à Secretaria de Esporte e Juventude que crie uma academia em um bairro -- ou ações interna da própria câmara, tais como votos de aplauso ou pesar. 
+* uma **legislativa** focada na criação e alteração de leis municipais, abrangendo desde a criação de conselhos, passando pela denominação de ruas, até diretrizes para políticas municipais, como na criação do Plano de Mobilidade de Campina Grande, e
+
+* uma **administrativa**, que se concentra em fiscalizar e requisitar medidas aos órgãos da prefeitura -- por exemplo, à Secretaria de Esporte e Juventude que crie uma academia em um bairro -- ou ações interna da própria câmara, tais como votos de aplauso ou pesar. 
 
 Desde o início da atual legislatura, nossa câmara analisou mais de 10.000 proposições. A enorme maioria são atos administrativos: 
 
@@ -67,6 +68,24 @@ ggplotly(p)
 
 ```
 
+Embora 10.000 proposições pareça um número alto, a câmara de João Pessoa, que tem apenas 4 vereadores a mais, analisou quase 30.000 proposições no mesmo período.
+
+### Sobre o que são as proposições?
+
+```{r}
+library(wordcloud)
+library(tm)
+
+crude = as.VCorpus(as.list(epv$title)) %>% 
+  tm_map(removePunctuation)
+tdm <- TermDocumentMatrix(crude)
+	m <- as.matrix(tdm)
+	v <- sort(rowSums(m),decreasing=TRUE)
+	d <- data.frame(word = names(v),freq=v)
+
+wordcloud(paste(epv$title), 
+          random.order = FALSE)
+```
 
 
 ### Quanto um vereador propõe?
