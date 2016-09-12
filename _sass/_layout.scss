@@ -241,14 +241,14 @@
 .post-link-color3 { background-color: #3498db; }
 .post-link-color4 { background-color: #1abc9c; }
 
-.post-link1 { @@extend .post-link-color1; }
-.post-link2 { @@extend .post-link-color2; }
-.post-link3 { @@extend .post-link-color3; }
-.post-link4 { @@extend .post-link-color4; }
-.post-link5 { @@extend .post-link-color1; }
-.post-link6 { @@extend .post-link-color2; }
-.post-link7 { @@extend .post-link-color3; }
-.post-link8 { @@extend .post-link-color4; }
+.post-link1 { @extend .post-link-color1; }
+.post-link2 { @extend .post-link-color2; }
+.post-link3 { @extend .post-link-color3; }
+.post-link4 { @extend .post-link-color4; }
+.post-link5 { @extend .post-link-color1; }
+.post-link6 { @extend .post-link-color2; }
+.post-link7 { @extend .post-link-color3; }
+.post-link8 { @extend .post-link-color4; }
 
 a.post-link {
   color: #fff;
