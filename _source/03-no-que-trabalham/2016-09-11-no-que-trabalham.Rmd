@@ -277,7 +277,7 @@ Prof Miguel Rodrigues é o vereador que mais apresentou propostas administrativa
 
 ### E se contamos o tempo na câmara?
 
-Como muitos vereadores suplentes assumiram desde 2103, temos vereadores que passaram períodos diferentes na câmara. Assim, é justo observarmos a **produtividade de propostas/mês** de nossos vereadores. 
+Como muitos vereadores suplentes assumiram desde 2013, temos vereadores que passaram períodos diferentes na câmara. Assim, é justo observarmos a **produtividade de propostas/mês** de nossos vereadores. 
 
 Abaixo analisamos a quantidade de propostas legislativas por mês dos vereadores, ignorando nomes, medalhes e títulos de cidadão. O tamanho do círculo reflete quantos meses o vereador atuou na câmara:
 
