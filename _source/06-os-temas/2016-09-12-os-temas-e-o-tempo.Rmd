@@ -9,11 +9,10 @@ tags: [temas]
 ```{r include=FALSE}
 # Incluir em todos os posts
 knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
+VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
 ```
 
 ```{r setup, include=FALSE}
-VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
-
 library(RPostgreSQL)
 library(dplyr, warn.conflicts = F)
 library(DT)
@@ -41,5 +40,6 @@ contagem %>%
   streamgraph("main_theme", "count", "time", ) %>%
   sg_fill_brewer("PuOr") %>%
   sg_legend(show = TRUE, label = "gênero: ")
+
 ```
 

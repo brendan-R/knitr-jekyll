@@ -52,9 +52,9 @@ vereadores2list = function(vereadores){
 cat(vereadores2list(vereadores_eleitos))
 ```
 
-<br>
+<br style="clear: left;"/>
 
-Como as aparências não dizem tudo, em outra análise olhamos também outros dados sobre [esses políticos antes da eleição](/2016/09/como-sao.html).
+Como as aparências não dizem tudo, você pode ver mais dados sobre esses políticos [neste outro post.](/2016/09/como-sao.html)
 
 ### Suplentes que assumiram
 
@@ -64,7 +64,8 @@ Além desses 23, eis os suplentes que em algum momento assumiram como vereadores
 cat(vereadores2list(vereadores_suplentes))
 ```
 
-<br>
+<br style="clear: left;"/>
+
 Claro, também olhamos os dados demográficos deles [em nossa segunda análise](/2016/09/como-sao.html).
 
 ### E por que 23 vereadores?
