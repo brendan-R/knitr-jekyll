@@ -54,7 +54,7 @@ cat(vereadores2list(vereadores_eleitos))
 
 <br style="clear: left;"/>
 
-Como as aparências não dizem tudo, você pode ver mais dados sobre esses políticos [neste outro post.](/vereadorescg-site/2016/09/como-sao.html).
+Como as aparências não dizem tudo, você pode ver mais dados sobre esses políticos [neste outro post.]({{ "/2016/09/como-sao.html" | prepend: site.baseurl }}).
 
 ### Suplentes que assumiram
 
@@ -66,7 +66,7 @@ cat(vereadores2list(vereadores_suplentes))
 
 <br style="clear: left;"/>
 
-Claro, também olhamos os dados demográficos deles [em nossa segunda análise](/vereadorescg-site/2016/09/como-sao.html).
+Claro, também olhamos os dados demográficos deles [em nossa segunda análise]({{ "/2016/09/como-sao.html" | prepend: site.baseurl }}).
 
 ### E por que 23 vereadores? 
 
