@@ -54,7 +54,7 @@ cat(vereadores2list(vereadores_eleitos))
 
 <br style="clear: left;"/>
 
-Como as aparências não dizem tudo, você pode ver mais dados sobre esses políticos [neste outro post.]({{ /2016/09/como-sao.html | prepend: site.baseurl }})
+Como as aparências não dizem tudo, você pode ver mais dados sobre esses políticos [neste outro post.]({% post_url 2016-09-04-como-sao %})..
 
 ### Suplentes que assumiram
 
@@ -66,9 +66,9 @@ cat(vereadores2list(vereadores_suplentes))
 
 <br style="clear: left;"/>
 
-Claro, também olhamos os dados demográficos deles [em nossa segunda análise](({{ /2016/09/como-sao.html | prepend: site.baseurl }})).
+Claro, também olhamos os dados demográficos deles [em nossa segunda análise]({% post_url 2016-09-04-como-sao %}).
 
-### E por que 23 vereadores?
+### E por que 23 vereadores? 
 
 O tamanho da população da cidade define a quantidade de vereadores de sua Câmara. Campina Grande tem **385.213 habitantes** (pelo [Censo de 2010](http://www.ibge.gov.br/home/estatistica/populacao/censo2010/), sendo assim ela encaixa-se na faixa de 300.000 até 450.000 definida pela Constituição Federal (Artigo 29-A), e tem obrigatoriamente **23 vereadores**.
 
