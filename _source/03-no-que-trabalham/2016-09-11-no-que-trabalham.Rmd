@@ -26,7 +26,7 @@ source("data_access.R")
 source("server.R")
 setwd(anterior) 
 source("site-lib.R")
-theme_set(theme_minimal(15))
+theme_set(theme_minimal(14))
 ```
 
 ```{r load, include = FALSE}
@@ -233,7 +233,7 @@ p = ggplot(legislativos) +
                  y = Propostas, 
                  size = Quantas, 
                  colour = Propostas), alpha = 0.6) + 
-  labs(x = "", y = "", "Propostas legislativas") + 
+  labs(x = "", y = "", title = "Propostas legislativas") + 
   scale_radius(range = c(1, 12)) +
   scale_color_brewer(type = "qual", palette = 1) + 
   theme(legend.position = "none") + 
@@ -265,7 +265,7 @@ p = ggplot(admins) +
                  size = Quantas, 
                  colour = Propostas), alpha = 0.6) + 
   labs(x = "", y = "", 
-       "Propostas administrativas") + 
+       title = "Propostas administrativas") + 
   scale_radius(range = c(1, 12)) +
   theme(legend.position = "none") + 
   scale_color_brewer(type = "qual", palette = 2) + 
@@ -304,7 +304,7 @@ p = ggplot(legislativos) +
   scale_color_brewer(type = "qual", palette = 3) + 
   theme(legend.position = "none") + 
   coord_flip()
-ggplotly(p, tooltip = c("x", "y", "size"))
+ggplotly(p, tooltip = c("x", "y", "size")) 
 ```
 
 Há grupos de vereadores com atuação diferente. Lourdes Costa e Rodolfo Rodrigues são dois vereadores que passaram bem pouco tempo na Câmara, mas produziram bastante. Alexandre do Sindicato, Bruno Cunha Lima e Pimentel Filho passaram dois anos ou mais, e apresentaram entre 3 e 4 propostas legislativas por mês. Em seguida, há um grupo de Inácio Falcão a Miguel da Construção que apresentou entre 1.6 e 2.3 medidas por mês. 
