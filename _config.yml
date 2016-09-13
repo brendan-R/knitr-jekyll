@@ -3,8 +3,8 @@ title: Nossos Vereadores - Campina
 email: nazareno@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
   Quem são nossos vereadores? O que fazem? Onde vivem, e do que se alimentam?.
-baseurl: "/vereadorescg-site/" # the subpath of your site, e.g. /blog/
-url: "https://nazareno.github.io" # the base hostname & protocol for your site
+baseurl: "/" # the subpath of your site, e.g. /blog/
+url: "http://vereadorescg.cc" # the base hostname & protocol for your site
 github_username:  analytics-ufcg
 permalink: /:year/:month/:title.html
 
