@@ -194,7 +194,7 @@
 
 .home-posts {
   background-color: lighten($brand-color, 25%);
-  
+
 }
 
 .page-content {
@@ -372,6 +372,10 @@ a.post-link {
 .vereador {
   float: left;
   width: 20%;
+
+  @include media-query($on-palm) {
+      width: 50%;
+  }
 
   > div {
     width: 120px;
