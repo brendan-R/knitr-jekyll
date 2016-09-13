@@ -312,6 +312,6 @@ ggplotly(p, tooltip = c("x", "y", "size"))
 
 Há grupos de vereadores com atuação bastante diferente. Lourdes Costa e Rodolfo Rodrigues são dois vereadores que passaram bem pouco tempo na Câmara, mas produziram bastante. Alexandre do Sindicato, Bruno Cunha Lima e Pimentel Filho passaram dois anos ou mais, e apresentaram entre 3 e 4 propostas legislativas por mês. Em seguida, há um grupo de Inácio Falcão a Miguel da Construção que apresentou entre 1.6 e 2.3 medidas por mês. 
 
-Rodrigo Ramos, Ivan Batista, Buchada, Orlandino Dias, Galego do Leite e Ivonete Ludgerio são exemplos de vereadores que estiveram por pelo menos 30 meses ativos, mas que apresentam *menos de uma proposta legislativa por mês* (excluindo denominações, medalhas e títulos de cidadã).
+Rodrigo Ramos, Ivan Batista, Buchada, Orlandino Dias, Galego do Leite e Ivonete Ludgerio são exemplos de vereadores que estiveram por pelo menos 30 meses ativos, mas que apresentam *menos de uma proposta legislativa por mês* (excluindo denominações, medalhas e títulos de cidadão).
 
 <!-- Seria muito bom também olhar os votos.  -->
