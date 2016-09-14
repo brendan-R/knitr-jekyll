@@ -163,7 +163,7 @@ hc_tm <- highchart() %>%
 hc_tm 
 ```
 
-O partido com maior número de eleitos é o PMDB. Em segundo lugar, com três candidatos temos o PMDB e curiosamente o PMN, o Partido da Mobilização Nacional, um partido que não tem deputados estaduais ou federais na Paraíba. Os três deputados desta legenda são Rodrigo Ramos, Sgt Regis e Galego do Leite. 
+O partido com maior número de eleitos é o PMDB. Em segundo lugar, com três candidatos temos o PSDB e curiosamente o PMN, o Partido da Mobilização Nacional, um partido que não tem deputados estaduais ou federais na Paraíba. Os três deputados desta legenda são Rodrigo Ramos, Sgt Regis e Galego do Leite. 
 
 Outros pontos notáveis na composição da câmara são a ausência do PT, e a coligação de partidos que são opostos no cenário nacional, como o PSC e PC do B. 
 
