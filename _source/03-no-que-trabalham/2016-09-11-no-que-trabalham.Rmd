@@ -276,7 +276,7 @@ ggplotly(p, tooltip = c("x", "y", "size"))
 
 Prof Miguel Rodrigues é o vereador que mais apresentou propostas administrativas, e também o que mais apresentou votos de aplauso e moções de pesar. Alexandre do Sindicato, Bruno Cunha Lima e Pimentel Filho estão entre os que mais produziram tanto legislativamente quanto administrativamente.
 
-### E se contamos o tempo na câmara?
+### E se contarmos o tempo na câmara?
 
 Como muitos vereadores suplentes assumiram desde 2013, temos vereadores que passaram períodos diferentes na câmara. Assim, é justo observarmos a **produtividade de propostas/mês** de nossos vereadores. 
 
