@@ -12,6 +12,8 @@ Caso você queira conhecer outros projetos nossos, você pode começar pelo [Que
 
 Esse projeto foi criado por Antônio Ricardo Jr, Ariadnée Abreu, Augusto Queiroz, Célio Barros Filho, Nazareno Andrade e Taciano Morais Silva, com a ajuda de mais um tanto de gente que nos deu sugestões e incentivos. Nenhum vereador foi ferido durante o desenvolvimento do projeto.
 
+Para entrar em contato, escreve pra a gente em **contato@vereadorescg.cc**.
+
 ### Os dados
 
 Os dados usados na construção deste site são principalmente obtidos do [Sistema de Busca de Documentos da Câmra Municipal de Campina Grande](http://187.115.174.90:8080/ScanLexWeb/). Também obtivemos dados do regimento da Câmara e de notícias sobre os vereadores e sobre Campina Grande.
