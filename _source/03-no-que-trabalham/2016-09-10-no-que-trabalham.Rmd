@@ -3,7 +3,6 @@ layout: post
 title:  "Como é seu trabalho?"
 subtitle: "Proposições, moções e legislações"
 published: true
-date: 2016-09-02
 categories: [análise]
 tags: [atos]
 ---

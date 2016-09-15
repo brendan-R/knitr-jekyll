@@ -3,7 +3,6 @@ layout: post
 title:  "Quanto ganham?"
 subtitle: "Conhecendo nossa folha de pagamento"
 published: true
-date: 2016-09-08
 categories: [informação]
 tags: [vereadores, finanças, salário]
 ---
