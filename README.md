@@ -18,9 +18,7 @@ sudo apt-get -y install libcurl4-openssl-dev
 sudo apt-get -y install libpq-dev
 ```
 
-Instalar pacotes que usamos:
-
-> ./r_deps_install.R
+Todos os pacotes de R serão instalados assim que você abrir a primeira sessão R (o 'packrat' vai cuidar de tudo :)
 
 ### Frontend
 

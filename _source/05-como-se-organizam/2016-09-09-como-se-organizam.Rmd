@@ -1,0 +1,120 @@
+---
+layout: post
+title:  "Como se organizam?"
+published: true
+categories: [análise]
+tags: [demograficos, representatividade]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
+
+current_dir = getwd()
+VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
+setwd(VEREADOR_DIR)
+source("server.R")
+source("data_access.R")
+source("vereadores_logic.R")
+setwd(current_dir) 
+
+library(ggplot2)
+library(dplyr, warn.conflicts = F)
+library(magrittr)
+library(wordcloud)
+library(stringr)
+
+theme_set(theme_minimal())
+
+all_vereadores = get_vereador() 
+
+# Get the legenda with (partidos between parenthesis)
+legenda_com_partidos = all_vereadores %>% 
+  group_by(nome_legenda) %>% 
+  summarize(legenda_partidos = paste0(nome_legenda[1], "\n(", 
+                                      paste0(sort(unique(sigla_partido)), collapse = ", "), ")"))
+
+# Get the vereadores eleitos
+vereadores = all_vereadores %>% 
+  filter(grepl("ELEITO", desc_sit_tot_turno)) %>% 
+  select(sequencial_candidato, nome_urna_candidato, sigla_partido, nome_legenda) %>% 
+  inner_join(legenda_com_partidos, by = "nome_legenda") %>% 
+  mutate(nome_legenda = legenda_partidos) %>% 
+  select(-legenda_partidos)
+
+# Add the partido and legenda size
+partido_size = count(vereadores, sigla_partido) %>% 
+  rename(tamanho_partido = n) %>% 
+  arrange(desc(tamanho_partido))
+
+legenda_size = count(vereadores, nome_legenda) %>% 
+  rename(tamanho_legenda = n) %>% 
+  arrange(desc(tamanho_legenda))
+
+vereadores %<>%
+  inner_join(partido_size, by = "sigla_partido") %>% 
+  inner_join(legenda_size, by = "nome_legenda")
+
+# Get Main Themes per Partido + Legenda (No Duplicated Ementa per Partido + Legenda)
+map_ementa_cand <- tbl(start_camara_db(), sql(
+  "select ementa_id, sequencial_candidato
+  from map_ementa_candidato
+  where published_date >= '2013-01-01'")) %>% 
+  collect() 
+
+all_ementas_themes <- get_ementas_all(start_camara_db()) %>% 
+  select(ementa_id, main_theme) %>% 
+  inner_join(map_ementa_cand, by = "ementa_id") %>% 
+  inner_join(vereadores, by = "sequencial_candidato") %>% 
+  distinct()
+
+```
+
+Normalmente conhecidos como partidos políticos, eles existem para reunir debaixo de um mesmo nome pessoas com ideais similares. Exemplos de partidos com história em nosso país são o PT (Partido dos Trabalhadores) e o PSDB (Partido da Social Democracia do Brasil). No entanto, temos visto um crescimento sem limites do número de partidos no nosso país, e isso não é diferente em Campina. Na última eleição (em 2012) as 23 cadeiras da Câmara foram ocupadas por **12 partidos** diferentes:
+
+```{r tamanho_partidos}
+vereadores %>% 
+  mutate(sigla_partido = reorder(sigla_partido, tamanho_partido)) %>% 
+  ggplot() +
+  geom_bar(aes(x = sigla_partido, fill = sigla_partido)) + 
+  coord_flip() +
+  labs(x = "", y = "Número de Vereadores") +
+  theme(legend.position = "none")
+```
+
+Além dos partidos o nosso código eleitoral permite a união de partidos em legendas, ou coligações, com o objetivo de unir partidos com ideias comuns mas, principalmente, para formatar o processo eleitoral. Que como todos sabem não é tão fácil de entender e explicar como o do prefeito. Em linhas gerais, cada legenda recebe a somatória de todos os votos de seus vereadores e com isso sabe quantas vagas terá na Câmara. Com isso a prioridade é dos vereadores mais votados da legenda.
+
+Na última eleição distribuimos as 23 vagas de nossa Cãmara para **8 legendas** diferentes:
+
+```{r tamanho_legendas, message=FALSE, warning=FALSE}
+vereadores %>% 
+  group_by(nome_legenda) %>% 
+  summarize(size = n()) %>% 
+  ungroup() %>%
+  mutate(nome_legenda = reorder(nome_legenda, size)) %>%
+  ggplot() +
+  geom_bar(aes(x = nome_legenda, y = size, fill = nome_legenda), stat = "identity") +
+  coord_flip() +
+  labs(x = "", y = "Número de Vereadores") +
+  theme(legend.position = "none")
+```
+
+<!-- ## Qual a diferença entre as legendas? -->
+
+<!-- Para compreender porque os partidos se unem (ou não) precisamos entender suas ideologias e projetos de governo. Utilizando os dados que temos podemos ter uma visão inicial[^footnote_dados_ideais] comparando as temáticas mais importantes para cada legenda. -->
+
+<!-- [^footnote_dados_ideais]: Para entendermos de fato as semelhanças e divergências de opinião dos partidos e legendas, precisaríamos ter em mãos as *votações de cada vereador a favor ou contra as proposições* durante o mandato. No entanto, não encontramos essa informação no site da [Cãmara](https://www.campinagrande.pb.leg.br/), nem em outro repositório público. -->
+
+<!-- ```{r, results = 'asis', fig.asp=.7, fig.width=5.5} -->
+<!-- legenda_theme_count = all_ementas_themes %>%  -->
+<!--   count(nome_legenda, main_theme) -->
+
+<!-- for (legenda in legenda_size$nome_legenda) { -->
+<!--   cat("\n###", str_replace(legenda, "\\n", "\n####"), "\n\n") -->
+<!--   theme_count = legenda_theme_count %>% filter(nome_legenda == legenda) -->
+<!--   wordcloud(words = theme_count$main_theme, freq = theme_count$n, -->
+<!--             scale = c(2.5,0.5), random.order = FALSE,  -->
+<!--             use.r.layout = F, colors = brewer.pal(8, "Dark2"),  -->
+<!--             rot.per = 0, fixed.asp = F) -->
+<!--   cat("\n") -->
+<!-- } -->
+<!-- ``` -->
