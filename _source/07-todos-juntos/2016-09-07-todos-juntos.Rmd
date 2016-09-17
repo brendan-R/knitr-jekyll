@@ -1,0 +1,85 @@
+---
+layout: post
+title:  "Todos Juntos"
+published: true
+categories: [análise]
+tags: [eficiência, férias]
+---
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE) 
+
+library(ggplot2, warn.conflicts = F, quietly = T)
+library(highcharter, warn.conflicts = F, quietly = T)
+library(dplyr, warn.conflicts = F, quietly = T)
+
+current_dir = getwd()
+VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
+setwd(VEREADOR_DIR)
+source("server.R")
+source("vereadores_logic.R")
+setwd(current_dir)
+
+theme_set(theme_minimal(16))
+
+meses = c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+mes_name = data_frame(mes_numero = 1:12, 
+                      Mes = factor(meses, meses, ordered = T))
+
+all_ementas_month_year = get_ementas_all(start_camara_db()) %>%
+    select(year, published_month, situation) %>%
+    mutate(mes_numero = as.numeric(month(published_month))) %>% 
+    inner_join(mes_name, by = "mes_numero") %>%
+    rename(Ano = year) %>%
+    filter(situation == 'APROVADO') %>% 
+    select(-situation, -mes_numero, -published_month)
+
+```
+
+Analisando a eficiência global da Câmara nessa legislatura em termos da quantidade de ementas aprovadas por ano percebemos um fato interessante, a quantidade de ementas diminuiu consistentemente com o passar dos anos do mandato. O fôlego dos vereadores cai de tal forma que uma análise rápida podemos prever que o 4º ano terminará com pouco mais que 50% do número de ementas do 1º ano![^footnote-dia-coleta]
+
+```{r ementas_por_ano}
+
+ano_count = all_ementas_month_year %>% 
+    count(Ano) %>% 
+    ungroup()
+
+highchart() %>% 
+  hc_chart(type = "column") %>% 
+  hc_title(text = "Nº de Ementas por Ano") %>% 
+  hc_xAxis(categories = ano_count$Ano) %>% 
+  hc_yAxis(plotLines = list(
+    list(
+          value = as.integer(ano_count$n[1]/2),
+          color = 'green',
+          width = 2,
+          zIndex = 4,
+          dashStyle = 'dash',
+          label = list(text = "50% do 1º ano de Mandato", 
+                       style = list(fontWeight = "bold", color = 'green')
+          )))) %>% 
+  hc_add_series(name = "Ementas", showInLegend = F, 
+                data = ano_count$n) %>% 
+  hc_add_series(name = "Ementas", type = "line", showInLegend = F, 
+                data = ano_count$n)
+
+```
+
+Uma das possíveis explicações é a recandidatura de grande parte dos vereadores em 2016 e com isso vinheram novos compromissos como agenda de gravações, comíssios, etc. Mas, além disso, existe um fato que impacta organicamente nossa Câmara que são os meses de férias dos vereadores.
+
+### Férias?
+Por lei, todo vereador pode ter até 3 meses de férias por ano. Fazendo as contas: se todo ano são 3 meses, em 4 anos eles tem por lei 12 meses de férias, ou seja, em um mandato de 4 anos eles só precisam trabalhar 3! Mas (para amenizar) a Câmara de Campina Grande definiu em seu regimento que eles tem **71 dias de férias**, entre os dias 23 de Dezembro e 10 de Fevereiro e entre 20 de Junho e 10 de Julho, não podiam deixar de curtir o Maior São João do Mundo, obviamente...
+
+Analisando o impacto das férias no número de proposições dos vereadores por mês[^footnote-dia-coleta], vemos que há uma queda tanto nos meses das férias em si (obviamente) como nos meses anteriores a elas. Ou seja, supondo a definição de um período único de férias, ou a redução do tempo de férias em si, podemos esperar um aumento na quantidade e, certamente, da responsividade aos problemas do nosso cotidiano que, de fato, não tiram férias.
+
+```{r ementas_por_mes_do_ano}
+ano_mes_count = all_ementas_month_year %>% count(Ano, Mes) %>% ungroup()
+
+hc_plot = hchart(ano_mes_count, "column", x = Ano, y = n, group = Mes) %>% 
+  hc_yAxis(title = "") %>% 
+  hc_xAxis(title = "") %>% 
+  hc_title(text = "Nº de Ementas por Mês")
+hc_plot
+```
+
+[^footnote-dia-coleta]: Os dados que embasaram essa análise foram coletados no dia *12 de Agosto de 2016*, além disso as ementas demoram alguns dias para serem adicionadas no sistema da Câmara, então podemos esperar um aumento nas ementas para os meses reportados.

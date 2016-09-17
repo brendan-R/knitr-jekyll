@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Como se organizam?"
-published: true
+published: false
 categories: [análise]
 tags: [demograficos, representatividade]
 ---
