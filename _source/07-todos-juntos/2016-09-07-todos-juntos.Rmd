@@ -36,7 +36,7 @@ all_ementas_month_year = get_ementas_all(start_camara_db()) %>%
 
 ```
 
-Analisando a eficiência global da Câmara nessa legislatura em termos da quantidade de ementas aprovadas por ano percebemos um fato interessante, a quantidade de ementas diminuiu consistentemente com o passar dos anos do mandato. O fôlego dos vereadores cai de tal forma que uma análise rápida podemos prever que o 4º ano terminará com pouco mais que 50% do número de ementas do 1º ano![^footnote-dia-coleta]
+Analisando a eficiência global da Câmara nessa legislatura em termos da quantidade de ementas aprovadas por ano percebemos um fato interessante, a quantidade de ementas diminuiu consistentemente com o passar dos anos. O fôlego dos vereadores cai de tal forma que se continuar como está podemos prever que o 4º ano terminará com pouco mais que 50% do número de ementas do 1º ano![^footnote-dia-coleta]
 
 ```{r ementas_por_ano}
 
@@ -65,12 +65,12 @@ highchart() %>%
 
 ```
 
-Uma das possíveis explicações é a recandidatura de grande parte dos vereadores em 2016 e com isso vinheram novos compromissos como agenda de gravações, comíssios, etc. Mas, além disso, existe um fato que impacta organicamente nossa Câmara que são os meses de férias dos vereadores.
+Uma das possíveis explicações para esse fato é a recandidatura de grande parte dos vereadores em 2016, que acarreta em vários compromissos inevitáveis extra Câmara. Mas, além disso, existe um fato que impacta consistentemente nossa Câmara anualmente, os meses de férias.
 
 ### Férias?
-Por lei, todo vereador pode ter até 3 meses de férias por ano. Fazendo as contas: se todo ano são 3 meses, em 4 anos eles tem por lei 12 meses de férias, ou seja, em um mandato de 4 anos eles só precisam trabalhar 3! Mas (para amenizar) a Câmara de Campina Grande definiu em seu regimento que eles tem **71 dias de férias**, entre os dias 23 de Dezembro e 10 de Fevereiro e entre 20 de Junho e 10 de Julho, não podiam deixar de curtir o Maior São João do Mundo, obviamente...
+Por lei, todo vereador pode ter até 3 meses de férias por ano. Fazendo as contas, se em todo ano são 3 meses, em 4 anos eles tem 12 meses de férias, ou seja, em um mandato de 4 anos eles só precisam trabalhar 3! Mas (para amenizar) a Câmara de Campina Grande definiu em seu regimento **71 dias** de férias por ano dividido em dois períodos: do dia *23 de Dezembro* à *10 de Fevereiro* e do dia *20 de Junho* à *10 de Julho*.
 
-Analisando o impacto das férias no número de proposições dos vereadores por mês[^footnote-dia-coleta], vemos que há uma queda tanto nos meses das férias em si (obviamente) como nos meses anteriores a elas. Ou seja, supondo a definição de um período único de férias, ou a redução do tempo de férias em si, podemos esperar um aumento na quantidade e, certamente, da responsividade aos problemas do nosso cotidiano que, de fato, não tiram férias.
+Analisando o impacto das férias no número de proposições dos vereadores por mês[^footnote-dia-coleta], vemos quedas na eficiência parlamentar tanto nos meses das férias em si como também uma tendência nos meses anteriores a elas (Maio e Novembro). Ou seja, supondo uma redução no tempo de férias, ou ao menos a existência de um período único, poderíamos esperar um aumento na quantidade e, certamente, da qualidade do trabalho dos vereadores que seria percebida pela maior responsividade para com os problemas da nossa cidade. 
 
 ```{r ementas_por_mes_do_ano}
 ano_mes_count = all_ementas_month_year %>% count(Ano, Mes) %>% ungroup()
