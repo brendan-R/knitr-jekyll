@@ -1,0 +1,135 @@
+---
+layout: post
+title:  "Qual o seu partido?"
+published: true
+categories: [análise]
+tags: [partidos, reeleição]
+---
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE) 
+
+library(dplyr, warn.conflicts = F, quietly = T)
+library(tidyr, warn.conflicts = F, quietly = T)
+library(readr, warn.conflicts = F, quietly = T)
+library(magrittr, warn.conflicts = F, quietly = T)
+library(stringi, warn.conflicts = F, quietly = T)
+library(stringr, warn.conflicts = F, quietly = T)
+
+current_dir = getwd()
+VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
+setwd(VEREADOR_DIR)
+source("data_access.R")
+setwd(current_dir)
+
+vereadores_part = tbl(start_camara_db(), sql(
+    "select distinct c.nome_urna_candidato, c.sigla_partido, c.ano_eleicao, c.cpf_candidato, c.desc_sit_tot_turno
+    from (
+            select distinct c.cpf_candidato
+            from consulta_cand c, map_proponent_candidato m 
+            where c.sequencial_candidato = m.sequencial_candidato and m.ano_eleicao = 2012  and c.ano_eleicao in (2012) and c.descricao_cargo = 'VEREADOR'
+    ) cpfs,
+    consulta_cand c
+    where ano_eleicao in (2008, 2012, 2016) and cpfs.cpf_candidato = c.cpf_candidato and c.descricao_cargo = 'VEREADOR'
+    order by c.cpf_candidato, ano_eleicao, c.nome_urna_candidato")) %>% 
+  collect()
+
+partido_espectro = read_csv("partido_espectro_ideologias.csv")
+# partido_espectro = read_csv("_source/08-qual-seu-partido/partido_espectro_ideologias.csv", )
+
+part_table = vereadores_part %>% 
+  inner_join(partido_espectro %>% select(sigla_partido, cor_espectro), by = "sigla_partido") %>% 
+  mutate(partido_cor = paste0(cor_espectro, " - ", sigla_partido)) %>% 
+  group_by(cpf_candidato) %>% 
+  mutate(nome_urna_candidato = nome_urna_candidato[ano_eleicao == 2012]) %>% 
+  ungroup() %>% 
+  select(nome_urna_candidato, partido_cor, ano_eleicao) %>% 
+  spread(ano_eleicao, partido_cor) %>%
+  mutate(nome_urna_candidato_img = nome_urna_candidato %>% stri_trans_general("LATIN-ASCII") %>%
+                    str_to_lower() %>% str_replace_all('[[:punct:]]', '') %>%
+                    str_replace_all(" ", "_") %>% paste0("{{ site.baseurl }}/img/vereadores_photos/", ., ".jpg"))
+
+part_table[is.na(part_table)] = "---"
+```
+
+A princípio, fazer parte de um partido político indicava que determinada pessoa pública compartilhava de certa ideologia, no entanto, em Campina Grande aparentemente essas definições ideológicas parecem não se sustentar. 
+
+Expomos abaixo os vereadores que trabalharam na Câmara nesse mandato (2013 - 2016) sendo eleitos ou suplentes ao lado dos partidos que eles fizeram parte nas eleições de 2008, 2012 e 2016 (eleição atual). Além de nomearmos os partidos, colorimos as células baseando-nos na sua posição  no espectro político disponível na Wikipédia ([Lista de Partidos Políticos no Brasil](https://pt.wikipedia.org/wiki/Lista_de_partidos_pol%C3%ADticos_no_Brasil#Partidos_ativos)). 
+
+A cor <font color='#ff3232'><b>vermelha</b></font> representa todos os partidos de extrema-esquerda, esquerda até esquerda-centro; a cor <font color='#ffff32'><b>amarela</b></font> representa os partidos centrais e; a cor <font color='#3232ff'><b>azul</b></font> os partidos de centro-direita e direita. 
+
+Analisando a tabela podemos capturar a situação de nossa Câmara por vários ângulos. 
+
+Inicialmente olhando a coluna de 2016 e excluindo os que não se candidatarão (em cinza) pelos seguintes motivos:
+
+* eleito Deputado Estadual em 2014: Tovar e Bruno Cunha Lima;
+* candidatura a prefeito / vice: Aragão Júnior candidato a prefeito em Matinhas e Inácio Falcão candidato a Vice de Adriano Galdino e; 
+* abriram mão para lançar candidaturas de parentes: Murilo Galdino que não se candidatou para ajudar na candidatura do irmão Adriano Galdino a prefeito de CG e Miguel da Construção que lança a candidatura do seu filho Mychael da Construção.
+ 
+Vemos que **todos os demais** são candidatos agora em 2016. 
+
+Além disso, reeleger-se parece ser mais importante do que a própria ideologia do partido do qual ele/ela fará parte. Em uma passada rápida pela tabela só observando as cores em cada linha, vemos várias vezes mudanças entre azul e amarelo, amarelo e vermelho e até entre azul e vermelho (diretamente da esquerda para direita ou vice-versa). Ou seja, ao mudar de cor na tabela, o vereador não somente muda de partido mas muda para um partido com raízes ideológicas completamente diferentes, muitas vezes rivais politicamente.
+
+```{r gera_table, results='asis'}
+
+GetTableData = function(partido_cor){
+    cor_part = str_split_fixed(partido_cor, ' - ', -1)[1,]
+    return (sprintf("<td style='text-align: center' %s>%s</td>", 
+                ifelse(cor_part[1] != "---", 
+                    sprintf("bgcolor='%s'", cor_part[1]), 
+                    "bgcolor='#b2b2b2'"),
+                ifelse(cor_part[1] != "---", 
+                    sprintf("<b>%s</b>", cor_part[2]), 
+                    sprintf("<b>%s</b>", cor_part[1])))) 
+}
+
+table_header = "
+    <thead><tr><th style='text-align: left'>Vereador</th>
+            <th style='text-align: center'>2008</th>
+            <th style='text-align: center'>2012</th>
+            <th style='text-align: center'>2016</th>
+            </tr>
+    </thead>"
+
+table_rows = ""
+
+for (i in 1:nrow(part_table)) {
+    table_rows = paste0(table_rows, 
+                        sprintf("<tr>
+                                    <td style='text-align: left; width: 50px'>
+                                        <div class='vereador' style='width: 100%%'> 
+                                            <div>
+                                                <img src='%s\' alt = '%s' width='85%%'/>
+                                            </div>
+                                            <p>
+                                                %s
+                                            </p>
+                                        </div>
+                                    </td>
+                                    %s
+                                    %s
+                                    %s
+                                </tr>",   
+                                    part_table$nome_urna_candidato_img[i],
+                                    part_table$nome_urna_candidato[i], 
+                                    part_table$nome_urna_candidato[i], 
+                                    part_table$'2008'[i] %>% GetTableData(), 
+                                    part_table$'2012'[i] %>% GetTableData(), 
+                                    part_table$'2016'[i] %>% GetTableData()))
+}
+
+result = sprintf("
+<table align='center'>
+    %s
+   <col width='112'>
+   <col width='112'>
+   <col width='112'>
+   <col width='112'>
+    <tbody>
+        %s
+    </tbody>
+</table>", table_header, table_rows)
+ 
+cat(result %>% str_replace_all("\n", " ") %>% str_replace_all(" * ", " ") %>% str_trim()) 
+```
+
