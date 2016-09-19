@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Todos Juntos"
+title:  "Quanto propuseram?"
 published: true
 categories: [análise]
 tags: [eficiência, férias]
@@ -36,7 +36,7 @@ all_ementas_month_year = get_ementas_all(start_camara_db()) %>%
 
 ```
 
-Analisando a eficiência global da Câmara nessa legislatura em termos da quantidade de ementas aprovadas por ano percebemos um fato interessante, a quantidade de ementas diminuiu consistentemente com o passar dos anos. O fôlego dos vereadores cai de tal forma que se continuar como está podemos prever que o 4º ano terminará com pouco mais que 50% do número de ementas do 1º ano![^footnote-dia-coleta]
+Analisando a eficiência global da Câmara nessa legislatura em termos do **número de proposições** aprovadas por ano percebemos um fato interessante, a quantidade de ementas diminuiu consistentemente com o passar dos anos. O fôlego dos vereadores cai de tal forma que se continuar como está podemos prever que o 4º ano terminará com pouco mais que 50% do número de ementas do 1º ano![^footnote-dia-coleta]
 
 ```{r ementas_por_ano}
 
@@ -65,7 +65,9 @@ highchart() %>%
 
 ```
 
-Uma das possíveis explicações para esse fato é a recandidatura de grande parte dos vereadores em 2016, que acarreta em vários compromissos inevitáveis extra Câmara. Mas, além disso, existe um fato que impacta consistentemente nossa Câmara anualmente, os meses de férias.
+Uma das possíveis explicações para esse fato é a recandidatura de praticamente todos os vereadores em 2016[^footnote-link-post], que acarreta em vários compromissos inevitáveis extra Câmara. Mas, além disso, existe um fato que impacta consistentemente nossa Câmara anualmente, os vários meses de férias.
+
+[^footnote-link-post]: Ver mais informações em [Qual o seu partido?]({{base.url}}/2016/09/qual-o-seu-partido.html)
 
 ### Férias?
 Por lei, todo vereador pode ter até 3 meses de férias por ano. Fazendo as contas, se em todo ano são 3 meses, em 4 anos eles tem 12 meses de férias, ou seja, em um mandato de 4 anos eles só precisam trabalhar 3! Mas (para amenizar) a Câmara de Campina Grande definiu em seu regimento **71 dias** de férias por ano dividido em dois períodos: do dia *23 de Dezembro* à *10 de Fevereiro* e do dia *20 de Junho* à *10 de Julho*.

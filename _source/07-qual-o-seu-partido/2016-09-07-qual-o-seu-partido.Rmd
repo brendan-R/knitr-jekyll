@@ -50,31 +50,35 @@ part_table = vereadores_part %>%
                     str_replace_all(" ", "_") %>% paste0("{{ site.baseurl }}/img/vereadores_photos/", ., ".jpg"))
 
 part_table[is.na(part_table)] = "---"
+
+cor_vermelho = '#ff3232' 
+cor_amarelo = '#e6e600' 
+cor_azul = '#3232ff' 
 ```
 
 A princípio, fazer parte de um partido político indicava que determinada pessoa pública compartilhava de certa ideologia, no entanto, em Campina Grande aparentemente essas definições ideológicas parecem não se sustentar. 
 
 Expomos abaixo os vereadores que trabalharam na Câmara nesse mandato (2013 - 2016) sendo eleitos ou suplentes ao lado dos partidos que eles fizeram parte nas eleições de 2008, 2012 e 2016 (eleição atual). Além de nomearmos os partidos, colorimos as células baseando-nos na sua posição  no espectro político disponível na Wikipédia ([Lista de Partidos Políticos no Brasil](https://pt.wikipedia.org/wiki/Lista_de_partidos_pol%C3%ADticos_no_Brasil#Partidos_ativos)). 
 
-A cor <font color='#ff3232'><b>vermelha</b></font> representa todos os partidos de extrema-esquerda, esquerda até esquerda-centro; a cor <font color='#ffff32'><b>amarela</b></font> representa os partidos centrais e; a cor <font color='#3232ff'><b>azul</b></font> os partidos de centro-direita e direita. 
+A cor <font color='`r cor_vermelho`'><b>vermelha</b></font> representa todos os partidos de extrema-esquerda, esquerda até esquerda-centro; a cor <font color='`r cor_amarelo`'><b>amarela</b></font> representa os partidos centrais e; a cor <font color='`r cor_azul`'><b>azul</b></font> os partidos de centro-direita e direita.
 
 Analisando a tabela podemos capturar a situação de nossa Câmara por vários ângulos. 
 
 Inicialmente olhando a coluna de 2016 e excluindo os que não se candidatarão (em cinza) pelos seguintes motivos:
 
 * eleito Deputado Estadual em 2014: Tovar e Bruno Cunha Lima;
-* candidatura a prefeito / vice: Aragão Júnior candidato a prefeito em Matinhas e Inácio Falcão candidato a Vice de Adriano Galdino e; 
+* candidatura a prefeito ou vice: Aragão Júnior candidato a prefeito de Matinhas e Inácio Falcão candidato a Vice de Adriano Galdino em Campina e; 
 * abriram mão para lançar candidaturas de parentes: Murilo Galdino que não se candidatou para ajudar na candidatura do irmão Adriano Galdino a prefeito de CG e Miguel da Construção que lança a candidatura do seu filho Mychael da Construção.
  
 Vemos que **todos os demais** são candidatos agora em 2016. 
 
-Além disso, reeleger-se parece ser mais importante do que a própria ideologia do partido do qual ele/ela fará parte. Em uma passada rápida pela tabela só observando as cores em cada linha, vemos várias vezes mudanças entre azul e amarelo, amarelo e vermelho e até entre azul e vermelho (diretamente da esquerda para direita ou vice-versa). Ou seja, ao mudar de cor na tabela, o vereador não somente muda de partido mas muda para um partido com raízes ideológicas completamente diferentes, muitas vezes rivais politicamente.
+Além disso, parece que os vereadores dando mais importância a reeleger-se do que a própria ideologia do partido do qual farão parte. Em uma passada rápida pela tabela só observando as cores em cada linha, vemos várias vezes mudanças entre <font color='`r cor_azul`'><b>azul</b></font> e <font color='`r cor_amarelo`'><b>amarelo</b></font>, <font color='`r cor_amarelo`'><b>amarelo</b></font> e <font color='`r cor_vermelho`'><b>vermelho</b></font> e até entre <font color='`r cor_azul`'><b>azul</b></font> e <font color='`r cor_vermelho`'><b>vermelho</b></font>, quando um vereador pula iretamente da esquerda para direita ou vice-versa. Ou seja, a mudança de cor na tabela mostra que o vereador não somente mudou de partido, mas mudou para um partido com raízes ideológicas completamente diferentes, muitas vezes com interesses políticos *rivais*.
 
 ```{r gera_table, results='asis'}
 
 GetTableData = function(partido_cor){
     cor_part = str_split_fixed(partido_cor, ' - ', -1)[1,]
-    return (sprintf("<td style='text-align: center' %s>%s</td>", 
+    return (sprintf("<td style='text-align: center;font-size: 20px;' %s>%s</td>", 
                 ifelse(cor_part[1] != "---", 
                     sprintf("bgcolor='%s'", cor_part[1]), 
                     "bgcolor='#b2b2b2'"),

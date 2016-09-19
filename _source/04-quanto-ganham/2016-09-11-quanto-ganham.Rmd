@@ -30,7 +30,7 @@ data_frame(habitantes = c("Menos de 10 mil", "De 10.001 mil à 50 mil", "De 50.0
   datatable(options = list(paging = F, searching = F, ordering = F, info = F), escape = F, rownames = FALSE)
 ```
 <br>
-Campina Grande tem **385.213 habitantes** (pelo [Censo de 2010](http://www.ibge.gov.br/home/estatistica/populacao/censo2010/)) então nossos vereadores podem receber até 60% do salário dos Deputados Estaduais. Que por sua vez, ganham 75% do salário dos Deputados Federais segundo a [Emenda Nº 19](http://www.planalto.gov.br/ccivil_03/Constituicao/Emendas/Emc/emc19.htm) da Constituição. Com isso a Constituição criou a conhecida carreira política legislativa, de Vereador para Deputado Estadual, depois para Deputado Federal (e certamente Senador ao final). E naturalmente, quanto mais capaz maior o salário. Mas lembremos bem, nós cidadãos somos os responsáveis por ditar quem progride e quem é demitido nessa empresa!
+Campina Grande tem **385.213 habitantes** (pelo [Censo de 2010](http://www.ibge.gov.br/home/estatistica/populacao/censo2010/)) então nossos vereadores podem receber até 60% do salário dos Deputados Estaduais. Que por sua vez, ganham exatamente 75% do salário dos Deputados Federais segundo a [Emenda Constitucional Nº 19](http://www.planalto.gov.br/ccivil_03/Constituicao/Emendas/Emc/emc19.htm). Com isso a Constituição criou a conhecida carreira política legislativa, de Vereador para Deputado Estadual, depois para Deputado Federal (e certamente Senador ao final).
 
 Concluindo a linha de pensamento, o salário mensal de uma Deputado Federal é *R$ 33,7 mil*[^footnote-salario-presidente], fazendo as contas:
 
