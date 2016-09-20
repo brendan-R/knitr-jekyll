@@ -1,6 +1,7 @@
 ---
 layout: post
-title:  "Qual o seu partido?"
+title: "Qual o seu partido?"
+subtitle: "Questionando a constante mudança de partido pelos vereadores"
 published: true
 categories: [análise]
 tags: [partidos, reeleição]

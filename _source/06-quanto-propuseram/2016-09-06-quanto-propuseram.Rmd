@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Quanto propuseram?"
-subtitle:  "Por mês e ano do mandato"
+subtitle:  "Produtividade por mês e ano do mandato"
 published: true
 categories: [análise]
 tags: [eficiência, férias]
@@ -35,7 +35,7 @@ all_ementas_month_year = get_ementas_all(start_camara_db()) %>%
 
 ### Proposições anualmente
 
-Analisando a eficiência da Câmara nessa legislatura em termos do número de proposições aprovadas por ano percebemos um fato interessante: a quantidade de ementas **diminuiu** consistentemente com o passar dos anos. A  fôlego dos vereadores cai de tal forma que se continuar como está podemos prever que 2016 terminará com pouco mais que 50% do número de ementas aprovadas no 1º ano![^footnote-dia-coleta]
+Analisando a eficiência da Câmara nessa legislatura em termos do número de proposições aprovadas por ano percebemos um fato interessante: a quantidade de ementas **diminuiu** consistentemente com o passar dos anos. A produtividade dos vereadores cai de tal forma que se continuar como está podemos prever que 2016 terminará com pouco mais que 50% do número de ementas aprovadas no 1º ano![^footnote-dia-coleta]
 
 ```{r ementas_por_ano}
 
@@ -83,4 +83,5 @@ hc_plot
 
 [^footnote-dia-coleta]: Os dados que embasaram essa análise foram coletados no dia *12 de Agosto de 2016*, além disso as ementas demoram alguns dias para serem adicionadas no sistema da Câmara, então podemos esperar um aumento nas ementas para os meses reportados.
 
-Mesmo sabendo que um vereador propõe mais do que outro, ou que a Câmara é menos ativa com o passar dos anos do mandato ainda resta uma dúvida, o que os vereadores estão propondo? As proposições tem alguma ligação com suas promessas de campanha? Confira mais detalhes no post [Qual o seu tema?]({{ "/2016/09/qual-o-seu-tema.html" | prepend: site.baseurl }})
+<!-- Mesmo sabendo que um vereador propõe mais do que outro, ou que a Câmara é menos ativa com o passar dos anos do mandato ainda resta uma dúvida, o que os vereadores estão propondo? As proposições tem alguma ligação com suas promessas de campanha? Confira mais detalhes no post [Qual o seu tema?]({{ "/2016/09/qual-o-seu-tema.html" | prepend: site.baseurl }})
+ -->

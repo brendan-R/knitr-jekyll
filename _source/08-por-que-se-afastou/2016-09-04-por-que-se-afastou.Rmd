@@ -1,0 +1,39 @@
+---
+layout: post
+title: "Por que se afastou?"
+subtitle: "Entendendo a saída de titulares para entrada de reservas"
+published: false
+categories: [análise]
+tags: [suplência, tempo de trabalho]
+---
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE) 
+
+library(highcharter, warn.conflicts = F, quietly = T)
+library(dplyr, warn.conflicts = F, quietly = T)
+
+current_dir = getwd()
+setwd(Sys.getenv("VEREADOR_DIR"))
+source("server.R")
+source("vereadores_logic.R")
+setwd(current_dir)
+
+meses = c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+mes_name = data_frame(mes_numero = 1:12, 
+                      Mes = factor(meses, meses, ordered = T))
+
+all_ementas_month_year = get_ementas_all(start_camara_db()) %>%
+    select(year, published_month, situation) %>%
+    mutate(mes_numero = as.numeric(month(published_month))) %>% 
+    inner_join(mes_name, by = "mes_numero") %>%
+    rename(Ano = year) %>%
+    filter(situation == 'APROVADO') %>% 
+    select(-situation, -mes_numero, -published_month)
+
+```
+
+### Quem se afastou?
+
+### Causas e Consequências
+
