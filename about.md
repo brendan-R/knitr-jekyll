@@ -16,7 +16,7 @@ Para entrar em contato, escreve pra a gente em **contato@vereadorescg.cc**.
 
 ### Os dados
 
-Os dados usados na construção deste site são principalmente obtidos do [Sistema de Busca de Documentos da Câmra Municipal de Campina Grande](http://187.115.174.90:8080/ScanLexWeb/) e do [Repositório de Dados Eleitorais do TSE](http://www.tse.jus.br/eleicoes/estatisticas/repositorio-de-dados-eleitorais). Também obtivemos dados do IBGE, do Regimento Interno da Câmara e de notícias em geral sobre os vereadores e sobre Campina Grande.
+Os dados usados na construção deste site são principalmente obtidos do [Sistema de Busca de Documentos da Câmra Municipal de Campina Grande](http://187.115.174.90:8080/ScanLexWeb/) e do [Repositório de Dados Eleitorais do TSE](http://www.tse.jus.br/eleicoes/estatisticas/repositorio-de-dados-eleitorais). Também obtivemos dados do [Censo de 2010 (IBGE)](http://www.ibge.gov.br/home/estatistica/populacao/censo2010/), do Regimento Interno da Câmara e de notícias em geral sobre os vereadores e sobre Campina Grande.
 
 Durante todo o projeto a Câmara esteve com o site fora do ar para evitar que suas publicações pudessem ser interpretadas como propaganda política pelo TSE, o que nos impediu de acessar informações históricas com maior facilidade. 
 

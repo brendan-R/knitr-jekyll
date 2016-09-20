@@ -7,7 +7,13 @@ categories: [informação]
 tags: [vereadores, finanças, salário]
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
 
+library(dplyr, warn.conflicts = F)
+library(magrittr)
+library(DT)
+```
 
 Em período eleitoral não é difícil aparecer candidato propondo doar salário a instituições de caridade ou reduzir o valor mensal pago pelo trabalho no legislativo. Mas, na realidade pagamos a cada um dos 23 vereadores quase 15 salários mínimos.
 
@@ -15,8 +21,13 @@ Em período eleitoral não é difícil aparecer candidato propondo doar salário
 
 A Constituição Federal ([Emenda Nº 25, Artigo 29 - Inciso VI](http://www.planalto.gov.br/ccivil_03/Constituicao/Emendas/Emc/emc25.htm)) especifica que o salário máximo dos vereadores é um percentual do salário dos deputados estaduais baseando-se no número de habitantes da cidade (emenda similar a que define o [número de vereadores](https://nazareno.github.io/vereadorescg-site//2016/09/quem-sao.html)):
 
-<!--html_preserve--><div id="htmlwidget-6836ba4ef602e3851b95" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-6836ba4ef602e3851b95">{"x":{"filter":"none","data":[["Menos de 10 mil","De 10.001 mil à 50 mil","De 50.001 à 100 mil","De 100.001 à 300 mil","<b>De 300.001 à 500 mil\u003c/b>","Mais de 500.000"],["20%","30%","40%","50%","<b>60%\u003c/b>","70%"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Número de Habitantes\u003c/th>\n      <th>Percentual do Salário dos Deputados Estaduais\u003c/th>\n    \u003c/tr>\n  \u003c/thead>\n\u003c/table>","options":{"paging":false,"searching":false,"ordering":false,"info":false,"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
+```{r percentual_salario, echo = FALSE}
+data_frame(habitantes = c("Menos de 10 mil", "De 10.001 mil à 50 mil", "De 50.001 à 100 mil", "De 100.001 à 300 mil", "<b>De 300.001 à 500 mil</b>", "Mais de 500.000"),
+           percentuais = c("20%", "30%", "40%", "50%", "<b>60%</b>", "70%")) %>% 
+  rename("Número de Habitantes" = habitantes, 
+         "Percentual do Salário dos Deputados Estaduais" = percentuais) %>% 
+  datatable(options = list(paging = F, searching = F, ordering = F, info = F), escape = F, rownames = FALSE)
+```
 <br/>
 Campina Grande tem **385.213 habitantes** ([Censo de 2010](http://www.ibge.gov.br/home/estatistica/populacao/censo2010/)) então nossos vereadores podem receber até 60% do salário dos deputados estaduais. Que por sua vez, ganham 75% do salário dos deputados federais segundo a [Emenda Nº 19](http://www.planalto.gov.br/ccivil_03/Constituicao/Emendas/Emc/emc19.htm) da Constituição. Com isso a Constituição criou uma espécie de plano de carreira, cargos e salários na política legislativa. A questão é que em tese quem decide sobre essa promoção no legislativo é o eleitor.
 

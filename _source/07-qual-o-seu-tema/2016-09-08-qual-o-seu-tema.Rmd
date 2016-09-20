@@ -1,25 +1,22 @@
 ---
 layout: post
-title:  Os temas e o tempo
-date: "2016-09-03"
+title:  Qual o seu tema?
+subtitle:  Uma visão temática dos vereadores
+date: "2016-09-05"
 published: false
+categories: [análise]
 tags: [temas]
 ---
 
-```{r include=FALSE}
-# Incluir em todos os posts
-knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
-VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
-```
-
 ```{r setup, include=FALSE}
-library(RPostgreSQL)
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
+
 library(dplyr, warn.conflicts = F)
 library(DT)
 library(streamgraph)
 
 anterior = getwd()
-setwd(VEREADOR_DIR)
+setwd(Sys.getenv("VEREADOR_DIR"))
 source("vereadores_logic.R")
 source("data_access.R")
 source("server.R")
@@ -32,8 +29,6 @@ library(streamgraph)
 contagem = get_sumario_no_tempo(camara_db, "main_theme", apenas_legislacao = TRUE)
 ```
 
-
-
 ```{r}
 contagem %>%
   filter(ymd(time) <= ymd(20140101), main_theme != "administração") %>%
@@ -43,3 +38,4 @@ contagem %>%
 
 ```
 
+**TODO: Criar uma visão temática por vereador, o mote principal é sabermos se o vereador honrou com suas promessas de campanha (não temos como responder se sim ou não, mas os cidadãos podem saber)**

@@ -7,29 +7,49 @@ categories: [análise]
 tags: [atos]
 ---
 
-```{r setup, include=FALSE}
-# Incluir em todos os posts
+```{r load, include=FALSE}
 knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
-VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
 
 library(ggplot2)
-library(RPostgreSQL)
 library(dplyr, warn.conflicts = F)
 library(plotly, warn.conflicts = F)
 library(DT)
 library(readr)
 
 anterior = getwd()
-setwd(VEREADOR_DIR)
+setwd(Sys.getenv("VEREADOR_DIR"))
 source("vereadores_logic.R")
 source("data_access.R")
 source("server.R")
 setwd(anterior) 
-source("site-lib.R")
+
 theme_set(theme_minimal(14))
 ```
 
-```{r load, include = FALSE}
+```{r setup, include = FALSE}
+
+get_vereadores_para_ui = function(db) {
+  vereadores = get_vereadores(db) %>%
+    mutate(eleito = ifelse(grepl("^ELEITO", desc_sit_tot_turno),
+                           "Eleito",
+                           "Suplente"),
+           sexo = descricao_sexo)
+
+  simpleCap <- function(x) {
+    s <- strsplit(x, " ")[[1]]
+    paste(toupper(substring(s, 1, 1)),
+          tolower(substring(s, 2)),
+          sep = "",
+          collapse = " ")
+  }
+
+  vereadores = vereadores %>%
+    mutate_at(vars(matches("nome|desc|sexo")), function(x)
+      sapply(x, simpleCap))
+
+  return(vereadores)
+}
+
 camara_db <- start_camara_db()
 vereadores = get_vereadores_para_ui(camara_db)
 ementas = get_ementas_all(camara_db, not_older_than = 2013)
@@ -50,10 +70,7 @@ Boa parte da atuação de nossos vereadores se concentra em apresentar propostas
 
 Desde o início da atual legislatura, nossa câmara analisou mais de 10.000 proposições. A enorme maioria são atos administrativos: 
 
-```{r}
-# ementas %>% ggplot() + geom_bar(aes(x = tipo_ato, fill = tipo_ato)) + 
-#   labs(x = "", y = "Quantidade") +  theme(legend.position = "none")
-
+```{r plot_adm_vs_leg}
 e = ementas %>%
   count(tipo_ato) %>%
   rename("tipo" = tipo_ato, "quantos" = n)
@@ -74,7 +91,7 @@ Embora 10.000 proposições pareça um número alto, a câmara de João Pessoa, 
 
 ### Sobre o que são as proposições?
 
-```{r include=FALSE}
+```{r tema_proposicoes, include=FALSE}
 library(RColorBrewer)
 library(NLP)
 library(wordcloud, warn.conflicts = F )
@@ -114,7 +131,7 @@ titulos = ementas %>% select(title) %>% filter(grepl("TÍTULO DE CID", title)) %
 
 As palavras mais frequentes nos títulos das propostas são bastante diferentes entre os atos legislativos e administrativos. Esses são os termos mais comuns nas **propostas legislativas** apresentadas desde 2013:
 
-```{r, fig.width=12, fig.height=10}
+```{r wordcloud_leg, fig.width=12, fig.height=10}
 wc_file = "word-freq_precomputada_leg.csv"
 
 d = get_wordfreqs(ementas, "Legislativo", wc_file)
@@ -135,7 +152,7 @@ A partir desses termos, conferimos que nas `r NROW(ementas %>% filter(tipo_ato =
 
 As palavras mais frequentes nos títulos das propostas são diferentes entre os atos legislativos e administrativos. Esses são as palavras mais comuns para as **propostas administrativas** apresentadas desde 2013:
 
-```{r, fig.width=10, fig.height=9, warning=FALSE}
+```{r wordcloud_adm, fig.width=10, fig.height=9, warning=FALSE}
 wc_file = "word-freq_precomputada_adm.csv"
 
 d = get_wordfreqs(ementas, "Administrativo", wc_file)

@@ -6,7 +6,7 @@ categories: [análise]
 tags: [partidos, reeleição]
 ---
 
-```{r setup, include=FALSE} 
+```{r load, include=FALSE} 
 knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE) 
 
 library(dplyr, warn.conflicts = F, quietly = T)
@@ -17,11 +17,12 @@ library(stringi, warn.conflicts = F, quietly = T)
 library(stringr, warn.conflicts = F, quietly = T)
 
 current_dir = getwd()
-VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
-setwd(VEREADOR_DIR)
+setwd(Sys.getenv("VEREADOR_DIR"))
 source("data_access.R")
 setwd(current_dir)
+```
 
+```{r setup, include=FALSE} 
 vereadores_part = tbl(start_camara_db(), sql(
     "select distinct c.nome_urna_candidato, c.sigla_partido, c.ano_eleicao, c.cpf_candidato, c.desc_sit_tot_turno
     from (
@@ -66,7 +67,7 @@ Analisando a tabela podemos capturar a situação de nossa Câmara por vários �
 
 Inicialmente olhando a coluna de 2016 e excluindo os que não se candidatarão (em cinza) pelos seguintes motivos:
 
-* eleito Deputado Estadual em 2014: Tovar e Bruno Cunha Lima;
+* continuação no cargo de Deputado Estadual eleito em 2014: Tovar e Bruno Cunha Lima;
 * candidatura a prefeito ou vice: Aragão Júnior candidato a prefeito de Matinhas e Inácio Falcão candidato a Vice de Adriano Galdino em Campina e; 
 * abriram mão para lançar candidaturas de parentes: Murilo Galdino que não se candidatou para ajudar na candidatura do irmão Adriano Galdino a prefeito de CG e Miguel da Construção que lança a candidatura do seu filho Mychael da Construção.
  
@@ -88,7 +89,7 @@ GetTableData = function(partido_cor){
 }
 
 table_header = "
-    <thead><tr><th style='text-align: left'>Vereador</th>
+    <thead><tr><th style='text-align: center'>Vereador</th>
             <th style='text-align: center'>2008</th>
             <th style='text-align: center'>2012</th>
             <th style='text-align: center'>2016</th>
@@ -100,7 +101,7 @@ table_rows = ""
 for (i in 1:nrow(part_table)) {
     table_rows = paste0(table_rows, 
                         sprintf("<tr>
-                                    <td style='text-align: left; width: 50px'>
+                                    <td style='text-align: center; width: 50px'>
                                         <div class='vereador' style='width: 100%%'> 
                                             <div>
                                                 <img src='%s\' alt = '%s' width='85%%'/>

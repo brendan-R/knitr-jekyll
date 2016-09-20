@@ -7,30 +7,21 @@ categories: [análise]
 tags: [demograficos, representatividade]
 ---
 
-```{r include=FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
 
-VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
-
-library(ggplot2)
-library(RPostgreSQL)
-library(plotly, warn.conflicts = F)
 library(lubridate, warn.conflicts = F)
 library(dplyr, warn.conflicts = F)
-library(readr)
-library(knitr)
 library(highcharter)
-library(stringi)
 library(stringr)
 library(DT)
 
-anterior = getwd()
-setwd(VEREADOR_DIR)
+wd_anterior = getwd()
+setwd(Sys.getenv("VEREADOR_DIR"))
 source("vereadores_logic.R")
 source("data_access.R")
 source("server.R")
-setwd(anterior) 
-theme_set(theme_minimal())
+setwd(wd_anterior) 
 
 camara_db <- start_camara_db()
 ```
@@ -62,7 +53,7 @@ Campina Grande, uma cidade com 52,7% da população feminina e 54,3% de eleitora
 
 <!-- População feminina de CG = 52,7% de acordo com o Censo 2010 (IBGE) -->
 
-```{r echo=FALSE}
+```{r vereador_genero, echo=FALSE}
 sumario <- count(vereadores, eleito, sexo) %>% ungroup()
 sumario = rbind(sumario, ## TODO substituir isso por expand.grid
                 data.frame(sexo = c("Feminino"), 
@@ -84,7 +75,7 @@ Embora a política seja aparentemente um dos poucos espaços de valorização da
 
 <!-- 13648 + 8921 -->
 
-```{r}
+```{r vereador_idade}
 idades = 2016 - year(dmy(vereadores$data_nascimento))
 hchart(idades, color = "#B71C1C", name = "Idade") %>% 
   hc_yAxis(title = "Quantidade nessa faixa") %>% 
@@ -95,7 +86,7 @@ hchart(idades, color = "#B71C1C", name = "Idade") %>%
 
 Um terço dos vereadores desta legislatura tem curso superior completo. O grau de escolaridade mais comum é o ensino médio completo, representando 45% do total.
 
-```{r}
+```{r vereador_formacao}
 sumario <- vereadores %>% 
   mutate(
     descricao_grau_instrucao = ifelse(
@@ -121,19 +112,16 @@ p = hchart(sumario, "column", x = descricao_grau_instrucao, y = n, group = eleit
 p
 ```
 
-
-```{r}
-sumario <- vereadores %>% 
-  count(descricao_ocupacao) %>% 
-  arrange(-n) %>% 
-  rename(`Ocupação` = descricao_ocupacao, `Quantos` = n )
-```
-
 # Ocupação
 
 Adotar a política como profissão é uma postura que costuma ser discursivamente rechaçada pelos brasileiros, os quais contraditoriamente ajudam a manter os políticos no poder cada vez que os reelegem. Entre os reeleitos é comum apontar a vereança como ocupação principal *(ou única?)*. Na atual legislatura em Campina Grande há uma forte tendência em assumir como profissão o cargo de vereador. Confira as demais ocupações indicadas pelos parlamentares.
 
-```{r results='asis'}
+```{r vereador_ocupacao}
+sumario <- vereadores %>% 
+  count(descricao_ocupacao) %>% 
+  arrange(-n) %>% 
+  rename(`Ocupação` = descricao_ocupacao, `Quantos` = n )
+
 datatable(sumario, options = list(paging = F, info = F, searching = F), rownames = FALSE)
 ```
 
@@ -143,7 +131,7 @@ O voto de legenda não é uma tradição brasileira. Estamos distantes de sermos
 
 Clicando nas coligações na figura abaixo você pode explorar a distribuição dos partidos dos vereadores eleitos.
 
-```{r include=FALSE}
+```{r vereador_partido, include=FALSE}
 library(treemap)
 
 v = vereadores %>% 
@@ -153,9 +141,7 @@ v = vereadores %>%
 tm <- treemap(v, index = c("nome_legenda", "sigla_partido"),
               vSize = "n", vColor = "nome_legenda")
 ```
-
-
-```{r}
+```{r vereador_partido_treemap, results='asis'}
 hc_tm <- highchart() %>% 
   hc_add_series_treemap(tm, allowDrillToNode = TRUE,
                        layoutAlgorithm = "squarified",
@@ -171,7 +157,7 @@ O partido com maior número de eleitos é o PMDB. Em segundo lugar, com três ca
 
 Confira os partidos de todos os eleitos:
 
-```{r results='asis'}
+```{r vereador_partido_coligacao}
 vereadores %>% 
   filter(eleito == "Eleito") %>% 
   select(nome_urna_candidato, sigla_partido, nome_legenda) %>% 

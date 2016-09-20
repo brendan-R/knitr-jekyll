@@ -1,6 +1,7 @@
 ---
 layout: post
 title:  "Quanto propuseram?"
+subtitle:  "Por mês e ano do mandato"
 published: true
 categories: [análise]
 tags: [eficiência, férias]
@@ -9,18 +10,14 @@ tags: [eficiência, férias]
 ```{r setup, include=FALSE} 
 knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE) 
 
-library(ggplot2, warn.conflicts = F, quietly = T)
 library(highcharter, warn.conflicts = F, quietly = T)
 library(dplyr, warn.conflicts = F, quietly = T)
 
 current_dir = getwd()
-VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
-setwd(VEREADOR_DIR)
+setwd(Sys.getenv("VEREADOR_DIR"))
 source("server.R")
 source("vereadores_logic.R")
 setwd(current_dir)
-
-theme_set(theme_minimal(16))
 
 meses = c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
 mes_name = data_frame(mes_numero = 1:12, 
@@ -36,7 +33,9 @@ all_ementas_month_year = get_ementas_all(start_camara_db()) %>%
 
 ```
 
-Analisando a eficiência global da Câmara nessa legislatura em termos do **número de proposições** aprovadas por ano percebemos um fato interessante, a quantidade de ementas diminuiu consistentemente com o passar dos anos. O fôlego dos vereadores cai de tal forma que se continuar como está podemos prever que o 4º ano terminará com pouco mais que 50% do número de ementas do 1º ano![^footnote-dia-coleta]
+### Proposições anualmente
+
+Analisando a eficiência da Câmara nessa legislatura em termos do número de proposições aprovadas por ano percebemos um fato interessante: a quantidade de ementas **diminuiu** consistentemente com o passar dos anos. A  fôlego dos vereadores cai de tal forma que se continuar como está podemos prever que 2016 terminará com pouco mais que 50% do número de ementas aprovadas no 1º ano![^footnote-dia-coleta]
 
 ```{r ementas_por_ano}
 
@@ -65,14 +64,12 @@ highchart() %>%
 
 ```
 
-Uma das possíveis explicações para esse fato é a recandidatura de praticamente todos os vereadores em 2016[^footnote-link-post], que acarreta em vários compromissos inevitáveis extra Câmara. Mas, além disso, existe um fato que impacta consistentemente nossa Câmara anualmente, os vários meses de férias.
+Uma das possíveis explicações para esse fato é a recandidatura de praticamente todos os vereadores em 2016 (ver post [Qual o seu partido?]({{ "/2016/09/qual-o-seu-partido.html" | prepend: site.baseurl }}), o que naturalmente acarreta em compromissos inevitáveis fora da Câmara. Mas, além disso, existe um fato que impacta nossa Câmara anualmente, a quantidade e a formatação das férias.
 
-[^footnote-link-post]: Ver mais informações em [Qual o seu partido?]({{base.url}}/2016/09/qual-o-seu-partido.html)
+### As Férias e o impacto nas proposições
+Por lei, todo vereador pode ter até 3 meses de férias por ano. Fazendo as contas, em 4 anos de mandato eles somarão 12 meses de férias, ou seja, apesar de serem eleitos para exercerem um mandato de 4 anos, só precisam trabalhar 3 anos! Como as Câmaras municipais tem autonomia para redefinir esse período, a Câmara de Campina Grande definiu em seu regimento **71 dias** de férias por ano dividido em dois períodos: do dia *23 de Dezembro* à *10 de Fevereiro* e do dia *20 de Junho* à *10 de Julho*.
 
-### Férias?
-Por lei, todo vereador pode ter até 3 meses de férias por ano. Fazendo as contas, se em todo ano são 3 meses, em 4 anos eles tem 12 meses de férias, ou seja, em um mandato de 4 anos eles só precisam trabalhar 3! Mas (para amenizar) a Câmara de Campina Grande definiu em seu regimento **71 dias** de férias por ano dividido em dois períodos: do dia *23 de Dezembro* à *10 de Fevereiro* e do dia *20 de Junho* à *10 de Julho*.
-
-Analisando o impacto das férias no número de proposições dos vereadores por mês[^footnote-dia-coleta], vemos quedas na eficiência parlamentar tanto nos meses das férias em si como também uma tendência nos meses anteriores a elas (Maio e Novembro). Ou seja, supondo uma redução no tempo de férias, ou ao menos a existência de um período único, poderíamos esperar um aumento na quantidade e, certamente, da qualidade do trabalho dos vereadores que seria percebida pela maior responsividade para com os problemas da nossa cidade. 
+Analisando o impacto das férias no número de proposições dos vereadores por mês[^footnote-dia-coleta], vemos quedas na eficiência parlamentar tanto nos meses das férias em si como também uma tendência nos meses anteriores a elas (Maio e Novembro). Ou seja, supondo uma redução no tempo de férias, ou ao menos a existência de um período único, poderíamos esperar um aumento na quantidade e, certamente, da qualidade do trabalho dos vereadores. 
 
 ```{r ementas_por_mes_do_ano}
 ano_mes_count = all_ementas_month_year %>% count(Ano, Mes) %>% ungroup()
@@ -85,3 +82,5 @@ hc_plot
 ```
 
 [^footnote-dia-coleta]: Os dados que embasaram essa análise foram coletados no dia *12 de Agosto de 2016*, além disso as ementas demoram alguns dias para serem adicionadas no sistema da Câmara, então podemos esperar um aumento nas ementas para os meses reportados.
+
+Mesmo sabendo que um vereador propõe mais do que outro, ou que a Câmara é menos ativa com o passar dos anos do mandato ainda resta uma dúvida, o que os vereadores estão propondo? As proposições tem alguma ligação com suas promessas de campanha? Confira mais detalhes no post [Qual o seu tema?]({{ "/2016/09/qual-o-seu-tema.html" | prepend: site.baseurl }})
