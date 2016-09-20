@@ -2,7 +2,7 @@
 layout: post
 title: "Por que se afastou?"
 subtitle: "Entendendo a saída de titulares para entrada de reservas"
-published: false
+published: true
 categories: [análise]
 tags: [suplência, tempo de trabalho]
 ---
@@ -10,30 +10,87 @@ tags: [suplência, tempo de trabalho]
 ```{r setup, include=FALSE} 
 knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE) 
 
-library(highcharter, warn.conflicts = F, quietly = T)
+# library(highcharter, warn.conflicts = F, quietly = T)
 library(dplyr, warn.conflicts = F, quietly = T)
+library(readr) 
 
-current_dir = getwd()
-setwd(Sys.getenv("VEREADOR_DIR"))
-source("server.R")
-source("vereadores_logic.R")
-setwd(current_dir)
+# vereadores_eleitos = read_csv("vereadores_2012_eleitos_img-vector.csv",
+#                               col_names = F,
+#                               col_types = cols(.default = col_character()))
+# 
+# vereadores_afast_posse = read_csv("vereadores_2012_afastamentos_posses.csv",
+#                                   col_names = F,
+#                                   col_types = cols(.default = col_character()))
 
-meses = c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
-mes_name = data_frame(mes_numero = 1:12, 
-                      Mes = factor(meses, meses, ordered = T))
+ 
+vereadores_afast_posse = read_csv("vereadores_2012_afastamentos_posses.csv",
+                                  col_types = cols(.default = col_character()))
 
-all_ementas_month_year = get_ementas_all(start_camara_db()) %>%
-    select(year, published_month, situation) %>%
-    mutate(mes_numero = as.numeric(month(published_month))) %>% 
-    inner_join(mes_name, by = "mes_numero") %>%
-    rename(Ano = year) %>%
-    filter(situation == 'APROVADO') %>% 
-    select(-situation, -mes_numero, -published_month)
+vereadores_eleitos = read_csv("vereadores_2012_eleitos_img-vector.csv",
+                              col_names = F,
+                              col_types = cols(.default = col_character())) %>% 
+  left_join(vereadores_afast_posse %>% select(sequencial_cand_afastado, vereador_afastado) %>% distinct(), by = c("X1" = "vereador_afastado"))
+
+
 
 ```
 
 ### Quem se afastou?
 
-### Causas e Consequências
+Como falamos no post [Quem são?]({{ "/2016/09/quem-sao.html" | prepend: site.baseurl }}) apesar de elegermos vereadores acreditando na sua capacidade em legislar, muitos se afastam alegando projetos secundários. Dos 23 eleitos, mais da metade passou pelo menos 4 meses afastado da Câmara.
 
+Vejam abaixo os <font color='red'><b>13 vereadores</b></font> com casos de afastamento.
+
+```{r vereadores_titulares, results='asis'}
+vereadores2list = function(vereadores){
+  resposta = ""
+  for (v in 1:NROW(vereadores)) {
+    resposta = paste(resposta, 
+                     sprintf("<div class='vereador'><div><img src='%s\' alt = '%s' width='100%%'/></div><p>%s</p></div>",
+            vereadores$X2[v],
+            vereadores$X1[v],
+            ifelse(!is.na(vereadores$sequencial_cand_afastado[v]), 
+                   sprintf("<b style='color: red;'>%s</b>", vereadores$X1[v]),
+                   vereadores$X1[v])))
+  }
+  resposta
+}
+
+cat(vereadores2list(vereadores_eleitos))
+```
+
+<br style="clear: left;"/>
+
+### Afastamento e Posses
+
+Analisamos a seguir os afastamentos e posses caso a caso (em ordem cronológica), expondo a justificativa dada pelo vereador para o afastamento como também para o retorno, o tempo afastado, qual suplente o substituiu. Aproveitamos também para questionar a produtividade em termos de proposições dos vereadores titulares vs. seus reservas.
+
+
+#### Caso TOVAR (Fev/2013 à Abr/2014 e de Fev/2015 até o fim do mandato)
+```{r caso_tovar}
+
+```
+
+#### Caso LAFITE (Abr/2014 à Fev/2016)
+
+#### Caso LULA CABRAL (Abr/2014 à Maio/2016)
+
+#### Caso JOIA GERMANO (Abr/2014 à Fev/2015 e de Fev/2015 à Maio/2016)
+
+#### Caso GALEGO DO LEITE (Set/2014 à Nov/2014)
+
+#### Caso RODRIGO RAMOS (Out/2014 à Jan/2015)
+
+#### Caso BUCHADA (Out/2014 à Fev/2015)
+
+#### Caso SAULO NORONHA (Out/2014 à Ago/2015)
+
+#### Caso INÁCIO FALCÃO (Fev/2015 até o fim do mandato)
+
+#### Caso BRUNO CUNHA LIMA (Fev/2015 até o fim do mandato)
+
+#### Caso MARINALDO CARDOSO (Mar/2015 à Set/2015
+
+#### Caso METUSELA AGRA (Abr/2015 à ...)
+
+#### Caso SGT REGIS (Jun/2015 à ...)

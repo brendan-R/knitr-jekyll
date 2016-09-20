@@ -28,7 +28,7 @@ Campina Grande, como cidade com menos de 450 mil habitantes, compõe seu poder l
 
 Relembre quem foram os eleitos como titulares do poder legislativo para o mandato 2013-2016. 
  
-```{r vereadores_titulares, results='asis', fig.width = 1.8}
+```{r vereadores_titulares, results='asis'}
 vereadores2list = function(vereadores){
   resposta = ""
   for (v in 1:NROW(vereadores)){
@@ -57,7 +57,7 @@ A legislação brasileira prevê a figura do vereador suplente como sendo aquele
 
 Saiba quem são os vereadores eleitos para suplência que assumiram a titularidade ao menos uma vez durante o mandato. 
 
-```{r vereadores_suplentes, results='asis', fig.width = 1.8}
+```{r vereadores_suplentes, results='asis'}
 cat(vereadores2list(vereadores_suplentes))
 ```
 
