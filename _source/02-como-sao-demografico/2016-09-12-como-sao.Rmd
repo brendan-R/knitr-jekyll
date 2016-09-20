@@ -1,17 +1,15 @@
 ---
 layout: post
 title:  "Como são?"
+subtitle: Gênero, idade, grau de formação e ocupação
 published: true
 categories: [análise]
 tags: [demograficos, representatividade]
 ---
 
 ```{r include=FALSE}
-# Incluir em todos os posts
 knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
-```
 
-```{r setup, include=FALSE}
 VEREADOR_DIR = Sys.getenv("VEREADOR_DIR")
 
 library(ggplot2)
@@ -57,16 +55,19 @@ vereadores = vereadores %>%
   mutate_at(vars(matches("nome|desc|sexo")), function(x) sapply(x, simpleCap))
 ```
 
-### Gênero, número e grau de formação
+### Gênero
+A representação feminina no poder legislativo de Campina Grande se distancia da emancipação que testemunhamos em outras áreas. A participação das mulheres na legislatura 2013-2016 é de 0% quando observamos especificamente a bancada titular. Entre os suplentes que assumiram tivemos três mulheres.
 
-Infelizmente, **não há mulheres entre os 23 vereadores eleitos para a legislatura 2013-2016**. Todos são homens. Entre os suplentes que assumiram, três mulheres foram ou são vereadoras. 
+Campina Grande, uma cidade com 52,7% da população feminina e 54,3% de eleitoras não eleger mulheres para a bancada do legislativo é um indicativo de que apenas a lei, que obriga um mínimo de 30% de candidatas nos quadros dos partidos, é instrumento insuficiente para mudar a representação feminina na esfera política, sobretudo quando o jeito de fazer política partidária é marcado pelo patriarcalismo.
+
+<!-- População feminina de CG = 52,7% de acordo com o Censo 2010 (IBGE) -->
 
 ```{r echo=FALSE}
 sumario <- count(vereadores, eleito, sexo) %>% ungroup()
 sumario = rbind(sumario, ## TODO substituir isso por expand.grid
                 data.frame(sexo = c("Feminino"), 
                            eleito = c("Eleito"), 
-                           n = c(0)))
+                           n = c(0))) 
 
 sumario = arrange(sumario, c(1, 3, 4, 2)) 
   
@@ -77,17 +78,22 @@ p = hchart(sumario, "column", x = eleito, y = n, group = sexo) %>%
 p
 ```
 
-Quanto à idade, vemos que a maioria dos nossos representantes tem em torno de 50 anos, apenas dois vereadores com menos de 30 anos (Anderson Maia e Bruno Cunha Lima) e um com mais de 70 (Orlandino Farias).
+### Idade
+
+Embora a política seja aparentemente um dos poucos espaços de valorização da experiência cronológica de seus agentes públicos, as chamadas raposas velhas estão perdendo espaço no âmbito do poder legislativo local. Em parte porque considera-se o poder legislativo municipal como o primeiro degrau dessa escada. Na carreira política espera-se que os idosos já estejam ocupando outros postos de maior representatividade na escala de valores do mundo político/partidário. De qualquer forma, a cidade que tem 8% da população votante com mais de 70 anos, dispõe na atual legislatura de apenas um representante nessa faixa etária (menos de 3%). A maioria dos eleitos tem em torno de 50 anos e dois estão com idade inferior aos 30 anos.
+
+<!-- 13648 + 8921 -->
 
 ```{r}
 idades = 2016 - year(dmy(vereadores$data_nascimento))
 hchart(idades, color = "#B71C1C", name = "Idade") %>% 
   hc_yAxis(title = "Quantidade nessa faixa") %>% 
-  hc_xAxis(title = "Faixa etária") %>% 
-  hc_title(text = "Idade de nossos representantes")
+  hc_xAxis(title = "Faixa etária")
 ```
 
-Olhando o grau de formação, vemos que um terço daqueles que atuaram como vereadores nessa última legislatura têm curso superior completo. O grau de escolaridade mais comum é o Ensino Médio completo (45% dos que nos representaram).
+### Grau de Formação
+
+Um terço dos vereadores desta legislatura tem curso superior completo. O grau de escolaridade mais comum é o ensino médio completo, representando 45% do total.
 
 ```{r}
 sumario <- vereadores %>% 
@@ -110,7 +116,6 @@ p = hchart(sumario, "column", x = descricao_grau_instrucao, y = n, group = eleit
   hc_plotOptions(column = list(stacking = "normal")) %>% 
   hc_yAxis(title = "") %>% 
   hc_xAxis(title = "") %>% 
-  hc_title(text = "Grau de formação") %>% 
   hc_colors(c("darkblue", "orange"))
   # hc_add_theme(hc_theme_smpl())
 p
@@ -124,19 +129,19 @@ sumario <- vereadores %>%
   rename(`Ocupação` = descricao_ocupacao, `Quantos` = n )
 ```
 
-Já quanto à ocupação que nossos representantes municipais declararam quando se candidataram, há uma tendência clara: a ocupação mais comum dos candidatos é... vereador. Embora vereador não seja uma profissão, uma parte dessas respostas pode se dever ao fato de que os vereadores tipicamente tentam reeleição. Atualmente, todos na câmara tentam, por exemplo. 
+# Ocupação
+
+Adotar a política como profissão é uma postura que costuma ser discursivamente rechaçada pelos brasileiros, os quais contraditoriamente ajudam a manter os políticos no poder cada vez que os reelegem. Entre os reeleitos é comum apontar a vereança como ocupação principal *(ou única?)*. Na atual legislatura em Campina Grande há uma forte tendência em assumir como profissão o cargo de vereador. Confira as demais ocupações indicadas pelos parlamentares.
 
 ```{r results='asis'}
 datatable(sumario, options = list(paging = F, info = F, searching = F), rownames = FALSE)
 ```
 
-<br> 
-
-Depois de vereador, a ocupação mais comum de nossos eleitos é comerciante. 
-
 ### Partido
 
-Finalmente, a coligação e o partido de nossos vereadores é um dado importante. Clicando nas coligações na figura abaixo você pode explorar a distribuição dos partidos dos vereadores eleitos. 
+O voto de legenda não é uma tradição brasileira. Estamos distantes de sermos eleitores guiados pela bandeira partidária. Nosso voto está muito pautado pela identidade com a figura do candidato. É essa cultura que faz muitas vezes elegermos um partido para o executivo sem garantir uma base aliada representativa no legislativo. Votamos em pessoas e não nos partidos. Apesar desse comportamento do eleitor, os partidos e coligações são os donos dos votos e entram para as estatísticas
+
+Clicando nas coligações na figura abaixo você pode explorar a distribuição dos partidos dos vereadores eleitos.
 
 ```{r include=FALSE}
 library(treemap)
@@ -162,11 +167,9 @@ hc_tm <- highchart() %>%
 hc_tm 
 ```
 
-O partido com maior número de eleitos é o PMDB. Em segundo lugar, com três candidatos temos o PSDB e curiosamente o PMN, o Partido da Mobilização Nacional, um partido que não tem deputados estaduais ou federais na Paraíba. Os três deputados desta legenda são Rodrigo Ramos, Sgt Regis e Galego do Leite. 
+O partido com maior número de eleitos é o PMDB. Em segundo lugar, com três candidatos temos o PSDB e curiosamente o PMN, o Partido da Mobilização Nacional, um partido que não tem deputados estaduais ou federais na Paraíba. Outros pontos que merecem observação na composição da câmara são a ausência do PT, e a coligação de partidos que são opostos no cenário nacional, como o PSC e PC do B. 
 
-Outros pontos notáveis na composição da câmara são a ausência do PT, e a coligação de partidos que são opostos no cenário nacional, como o PSC e PC do B. 
-
-Sobre os demais, eis os partidos de todos os eleitos: 
+Confira os partidos de todos os eleitos:
 
 ```{r results='asis'}
 vereadores %>% 
@@ -179,4 +182,5 @@ vereadores %>%
   rename("Eleito" = nome_urna_candidato, "Partido" = sigla_partido, "Coligação" = nome_legenda) %>% 
   datatable(options = list(paging = F, info = F), rownames = FALSE)
 ```
-
+<br/>
+No entanto, a organização partidária da Câmara mudou completamente em 2016, quer saber por quê? Confira em [Qual o seu partido?]({{ "/2016/09/qual-o-seu-partido.html" | prepend: site.baseurl }}).
