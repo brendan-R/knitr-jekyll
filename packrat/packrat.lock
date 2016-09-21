@@ -1,7 +1,7 @@
 PackratFormat: 1.4
 PackratVersion: 0.4.8.1
 RVersion: 3.3.1
-Repos: CRAN=https://cran.cnr.Berkeley.edu/
+Repos: CRAN=https://cran.rstudio.com/
 
 Package: BH
 Source: CRAN
@@ -19,6 +19,17 @@ Version: 0.2
 Hash: 36b032203797956fedad5a25055016a9
 Requires: htmltools, htmlwidgets, magrittr
 
+Package: MASS
+Source: CRAN
+Version: 7.3-45
+Hash: 0650d5701aa7e369e77c9e2c8e1dc913
+
+Package: Matrix
+Source: CRAN
+Version: 1.2-7.1
+Hash: 44c7e8fe4ce50a044ec2e5196f6694cc
+Requires: lattice
+
 Package: NLP
 Source: CRAN
 Version: 0.1-9
@@ -28,8 +39,9 @@ Package: NMF
 Source: CRAN
 Version: 0.20.6
 Hash: 632aad207ab2e551b33990c9f09ab8af
-Requires: RColorBrewer, colorspace, digest, doParallel, foreach,
-    ggplot2, gridBase, pkgmaker, registry, reshape2, rngtools, stringr
+Requires: RColorBrewer, cluster, colorspace, digest, doParallel,
+    foreach, ggplot2, gridBase, pkgmaker, registry, reshape2, rngtools,
+    stringr
 
 Package: R6
 Source: CRAN
@@ -93,7 +105,7 @@ Package: broom
 Source: CRAN
 Version: 0.4.1
 Hash: c90145ada2eac0128487c21ab2ac9c78
-Requires: dplyr, plyr, psych, reshape2, stringr, tidyr
+Requires: dplyr, nlme, plyr, psych, reshape2, stringr, tidyr
 
 Package: caTools
 Source: CRAN
@@ -111,6 +123,16 @@ Package: chron
 Source: CRAN
 Version: 2.3-47
 Hash: d25d96d908cd21080f24c89eed4c80a0
+
+Package: cluster
+Source: CRAN
+Version: 2.0.4
+Hash: 320a1aa7004a469e2e484780b7748eb3
+
+Package: codetools
+Source: CRAN
+Version: 0.2-14
+Hash: 127e7e68dfa21d3f17c022df1e727d0a
 
 Package: colorspace
 Source: CRAN
@@ -167,18 +189,29 @@ Package: foreach
 Source: CRAN
 Version: 1.4.3
 Hash: cd53ef4cf29dc59ce3f8c5c1af735fd1
-Requires: iterators
+Requires: codetools, iterators
 
 Package: formatR
 Source: CRAN
 Version: 1.4
 Hash: b2a47a2b91737978cf50ba95825a9cd1
 
+Package: futile.logger
+Source: CRAN
+Version: 1.4.3
+Hash: d1cc6584b39f2c4cfbe377fd94cbdbaa
+Requires: futile.options, lambda.r
+
+Package: futile.options
+Source: CRAN
+Version: 1.0.0
+Hash: 4f24cbf581681c263186b9425f05ba3e
+
 Package: ggplot2
 Source: CRAN
 Version: 2.1.0
 Hash: 50e297b0191179c39c7dcae0eff72b51
-Requires: digest, gtable, plyr, reshape2, scales
+Requires: MASS, digest, gtable, plyr, reshape2, scales
 
 Package: git2r
 Source: CRAN
@@ -211,6 +244,7 @@ Package: hexbin
 Source: CRAN
 Version: 1.27.1
 Hash: 9f94c576cc4b9e83fd714ae8387272e6
+Requires: lattice
 
 Package: highcharter
 Source: CRAN
@@ -258,12 +292,13 @@ Package: igraph
 Source: CRAN
 Version: 1.0.1
 Hash: 26ac36402e881905359daabfd9ba4057
-Requires: NMF, irlba, magrittr
+Requires: Matrix, NMF, irlba, magrittr
 
 Package: irlba
 Source: CRAN
 Version: 2.1.1
 Hash: c7ce885231f39df8aae35287aa7ea3ea
+Requires: Matrix
 
 Package: iterators
 Source: CRAN
@@ -285,6 +320,16 @@ Package: labeling
 Source: CRAN
 Version: 0.2
 Hash: 9f11050d84ff44d77d6113272c0ab2db
+
+Package: lambda.r
+Source: CRAN
+Version: 1.1.9
+Hash: d303aea60871b91892fa3815aac6a725
+
+Package: lattice
+Source: CRAN
+Version: 0.20-34
+Hash: 4390fc5602fd36017be70a27f7123ff3
 
 Package: lazyeval
 Source: CRAN
@@ -330,6 +375,12 @@ Version: 0.4.2
 Hash: 72d343a6664778029f49a7ad36de1cab
 Requires: colorspace
 
+Package: nlme
+Source: CRAN
+Version: 3.1-128
+Hash: 72d50aad85f45456d60ded8ee47a8454
+Requires: lattice
+
 Package: openssl
 Source: CRAN
 Version: 0.9.4
@@ -344,7 +395,7 @@ Package: pkgmaker
 Source: CRAN
 Version: 0.22
 Hash: 2e5fc2a6b7eaeb1e1d397a8dc5f54480
-Requires: digest, registry, stringr, xtable
+Requires: codetools, digest, registry, stringr, xtable
 
 Package: plotly
 Source: CRAN
@@ -401,7 +452,7 @@ Package: reshape2
 Source: CRAN
 Version: 1.2.2
 Hash: fed74e4cb56564ac6304f8958ac28a45
-Requires: plyr, stringr
+Requires: lattice, plyr, stringr
 
 Package: rlist
 Source: CRAN
@@ -448,8 +499,8 @@ Requires: R6, digest, htmltools, httpuv, jsonlite, mime, sourcetools,
 
 Package: slam
 Source: CRAN
-Version: 0.1-38
-Hash: fae6bb05e5c2d8867df575ede304d5cb
+Version: 0.1-37
+Hash: 740c48508560bad618c8214012da81d9
 
 Package: sourcetools
 Source: CRAN
@@ -555,3 +606,4 @@ Package: zoo
 Source: CRAN
 Version: 1.7-13
 Hash: 5e9d37229de4b68b9a5e09a619e0f9b6
+Requires: lattice
