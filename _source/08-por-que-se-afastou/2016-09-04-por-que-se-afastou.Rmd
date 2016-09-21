@@ -7,33 +7,113 @@ categories: [análise]
 tags: [suplência, tempo de trabalho]
 ---
 
-```{r setup, include=FALSE} 
-knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE) 
+```{r load, include=FALSE} 
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE, fig.width=12) 
 
-# library(highcharter, warn.conflicts = F, quietly = T)
+library(lubridate, warn.conflicts = F, quietly = T)
 library(dplyr, warn.conflicts = F, quietly = T)
-library(readr) 
+library(magrittr, warn.conflicts = F, quietly = T)
+library(RPostgreSQL, warn.conflicts = F, quietly = T)
+library(ggplot2, warn.conflicts = F, quietly = T)
+library(readr)
+library(stringr)
 
-# vereadores_eleitos = read_csv("vereadores_2012_eleitos_img-vector.csv",
-#                               col_names = F,
-#                               col_types = cols(.default = col_character()))
-# 
-# vereadores_afast_posse = read_csv("vereadores_2012_afastamentos_posses.csv",
-#                                   col_names = F,
-#                                   col_types = cols(.default = col_character()))
+theme_set(theme_bw(18))
 
- 
-vereadores_afast_posse = read_csv("vereadores_2012_afastamentos_posses.csv",
-                                  col_types = cols(.default = col_character()))
+# READ CSVs com Afastamento e Path pra Imagens
+vereadores_afast_posses = read_csv("vereadores_2012_afastamentos_posses.csv",
+                                  col_types = cols(.default = col_character())) %>% 
+    mutate(data_afastamento = dmy(data_afastamento),
+           data_retorno = dmy(data_retorno),
+           sequencial_cand_afastado = as.numeric(sequencial_cand_afastado),
+           sequencial_cand_suplente = as.numeric(sequencial_cand_suplente)) %>% 
+    arrange(data_afastamento)
 
-vereadores_eleitos = read_csv("vereadores_2012_eleitos_img-vector.csv",
-                              col_names = F,
+veread_eleitos_img = read_csv("vereadores_2012_eleitos_img-vector.csv",
+                              col_names = c("vereador", "img_path"),
                               col_types = cols(.default = col_character())) %>% 
-  left_join(vereadores_afast_posse %>% select(sequencial_cand_afastado, vereador_afastado) %>% distinct(), by = c("X1" = "vereador_afastado"))
+    left_join(vereadores_afast_posses %>% 
+                  select(sequencial_cand_afastado, vereador_afastado) %>% 
+                  distinct(), by = c("vereador" = "vereador_afastado"))
+
+afastados_img = veread_eleitos_img %>% 
+    filter(!is.na(sequencial_cand_afastado))
+
+suplentes_img = read_csv("vereadores_2012_suplentes_img-vector.csv",
+                              col_names = c("vereador_suplente", "img_path"),
+                              col_types = cols(.default = col_character()))
 
 
+### Read Ementas no Tempo
+StartCamaraDB <- function(port = 5432, host = "localhost") {
+    cat("Creating Postgres Connection")
+    postgres_user = Sys.getenv("POSTGRES_USER")
+    postgres_pass = Sys.getenv("POSTGRES_PASS")
+    src_postgres(
+        dbname = "camara_db",
+        user = postgres_user,
+        password = postgres_pass,
+        port = port,
+        host = host
+    )
+}
+
+camara_db = if (!exists("camara_db")) StartCamaraDB() else camara_db
+
+ementas_vereadores = tbl(camara_db, sql(
+    "SELECT cons_cand.sequencial_candidato, 
+            cons_cand.nome_urna_candidato,
+            cons_cand.nome_legenda AS nome_coligacao,
+            cons_cand.desc_sit_tot_turno AS situacao_eleicao,
+            ement_cand.published_date,
+            date_trunc('month', ement_cand.published_date) as published_month
+    FROM map_ementa_candidato ement_cand, ementas, consulta_cand cons_cand
+    WHERE ement_cand.ementa_id = ementas.ementa_id and 
+          ement_cand.sequencial_candidato = cons_cand.sequencial_candidato and
+          ementas.situation = 'APROVADO' and
+          cons_cand.ano_eleicao = 2012 and
+          cons_cand.descricao_cargo = 'VEREADOR'
+    ORDER BY cons_cand.ano_eleicao, cons_cand.nome_urna_candidato")) %>% 
+    collect() %>% 
+    mutate(published_year = year(published_date),
+           nome_situacao_candidato = ifelse(situacao_eleicao == "SUPLENTE", 
+                                            paste0(str_replace(nome_urna_candidato, " ", "\n"), "\n(SUPLENTE)"),
+                                            str_replace(nome_urna_candidato, " ", "\n")))
+
+ementas_por_mes = ementas_vereadores %>% 
+    count(sequencial_candidato, nome_situacao_candidato, nome_coligacao, published_year, published_month) %>% 
+    ungroup()
+
+legendas = tbl(camara_db, sql("select nome_coligacao, sigla_partido 
+    from consulta_legendas 
+    where ano_eleicao = 2012 and nome_ue = 'CAMPINA GRANDE' and descricao_cargo = 'VEREADOR' 
+    order by 1, 2")) %>%
+    collect()
+```
+
+```{r funcs}
+
+vereador_div_sprintf = function(img_src, alt, paragraph){
+    sprintf("<div class='vereador'><div><img src='%s\' alt = '%s' width='100%%'/></div><p>%s</p></div>",
+            img_src, alt, paragraph)
+}
+
+vereadores2list = function(vereadores){
+    resposta = ""
+    for (v in 1:NROW(vereadores)) {
+        resposta = paste(resposta, 
+                         vereador_div_sprintf(
+                             vereadores$img_path[v],
+                             vereadores$vereador[v],
+                             ifelse(!is.na(vereadores$sequencial_cand_afastado[v]), 
+                                    sprintf("<b style='color: red;'>%s</b>", vereadores$vereador[v]),
+                                    vereadores$vereador[v])))
+    }
+    resposta
+}
 
 ```
+
 
 ### Quem se afastou?
 
@@ -42,55 +122,217 @@ Como falamos no post [Quem são?]({{ "/2016/09/quem-sao.html" | prepend: site.ba
 Vejam abaixo os <font color='red'><b>13 vereadores</b></font> com casos de afastamento.
 
 ```{r vereadores_titulares, results='asis'}
-vereadores2list = function(vereadores){
-  resposta = ""
-  for (v in 1:NROW(vereadores)) {
-    resposta = paste(resposta, 
-                     sprintf("<div class='vereador'><div><img src='%s\' alt = '%s' width='100%%'/></div><p>%s</p></div>",
-            vereadores$X2[v],
-            vereadores$X1[v],
-            ifelse(!is.na(vereadores$sequencial_cand_afastado[v]), 
-                   sprintf("<b style='color: red;'>%s</b>", vereadores$X1[v]),
-                   vereadores$X1[v])))
-  }
-  resposta
-}
-
-cat(vereadores2list(vereadores_eleitos))
+cat(vereadores2list(veread_eleitos_img))
 ```
 
 <br style="clear: left;"/>
 
-### Afastamento e Posses
+### Contando Casos de Afastamento e Posses
 
-Analisamos a seguir os afastamentos e posses caso a caso (em ordem cronológica), expondo a justificativa dada pelo vereador para o afastamento como também para o retorno, o tempo afastado, qual suplente o substituiu. Aproveitamos também para questionar a produtividade em termos de proposições dos vereadores titulares vs. seus reservas.
+Contamos a seguir os casos afastamentos e posses (em ordem cronológica), aproveitamos também para questionar a produtividade em termos de proposições dos vereadores titulares vs. seus reservas.
 
+```{r aux_func}
+MesAno = function(date_val){
+    meses = c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+    paste0(meses[month(date_val)], "/", year(date_val))
+}
 
-#### Caso TOVAR (Fev/2013 à Abr/2014 e de Fev/2015 até o fim do mandato)
-```{r caso_tovar}
+DiaMesAno = function(date_val){
+    paste0(str_pad(day(date_val), 2, 'left', 0), "/", MesAno(date_val))
+}
+
+PrintTitularSuplenteImgs = function(afastados_img, veread_afast_posses, v){
+    vereador_img = afastados_img %>% filter(vereador == v)
+    vereador_suplentes_img = suplentes_img %>% inner_join(veread_afast_posses, by = "vereador_suplente") %>% arrange(data_afastamento)
+
+    cat(vereador_div_sprintf(vereador_img$img_path[1], vereador_img$vereador[1],
+                             sprintf("<span style='color: red;'>%s</span>", vereador_img$vereador[1])))
+    cat(vereador_div_sprintf(vereador_suplentes_img$img_path, vereador_suplentes_img$vereador_suplente, 
+                             sprintf("<span style='color: green;'>%s</span>", vereador_suplentes_img$vereador_suplente)))
+}
+
+PlotEmentasPorMes = function(ementas_por_mes, veread_afast_posses, v){
+    eleito_por_mes = ementas_por_mes %>% 
+        filter(sequencial_candidato == veread_afast_posses$sequencial_cand_afastado[1])
+    suplentes_por_mes = ementas_por_mes %>% 
+                      semi_join(veread_afast_posses, by = c("sequencial_candidato" = "sequencial_cand_suplente"))
+
+    eleito_suplentes_count_mes = bind_rows(eleito_por_mes, suplentes_por_mes) %>%
+        mutate(nome_situacao_candidato = factor(nome_situacao_candidato, 
+                                                levels = c(unique(eleito_por_mes$nome_situacao_candidato),
+                                                           unique(suplentes_por_mes$nome_situacao_candidato)))) %>% 
+        select(nome_situacao_candidato, published_year, published_month, n) %>% 
+        mutate(published_month = as.POSIXct(published_month))
+
+    ggplot(eleito_suplentes_count_mes,
+           aes(x = as.POSIXct(published_month), fill = nome_situacao_candidato)) +
+        geom_bar(aes(y = n), stat = "identity") +
+        scale_x_datetime(date_labels = "%m/%y", date_breaks = "4 months") +
+        facet_grid(nome_situacao_candidato~published_year, scales = "free_x") +
+        labs(x = "Mês", y = "Nº de Ementas", fill = "Vereador") +
+        theme(legend.position = "none", strip.text.y = element_text(angle = 0))
+}
 
 ```
 
-#### Caso LAFITE (Abr/2014 à Fev/2016)
+#### Caso TOVAR
 
-#### Caso LULA CABRAL (Abr/2014 à Maio/2016)
+```{r tovar_imgs, results='asis'}
+v = 'TOVAR - PSDB'
+tovar_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
 
-#### Caso JOIA GERMANO (Abr/2014 à Fev/2015 e de Fev/2015 à Maio/2016)
+PrintTitularSuplenteImgs(afastados_img, tovar_afast_posses, v)
+```
 
-#### Caso GALEGO DO LEITE (Set/2014 à Nov/2014)
+Tovar foi um dos vereadores que menos tempo passou na Câmara após ser eleito. Logo no início do mandato, no dia **`r DiaMesAno(tovar_afast_posses$data_afastamento[1])`** ele se afasta para exercer a função de Chefe de Gabinete do prefeito. Nesse momento entra em cena Ivonete Ludgério (PSB), uma das figuras mais intrigantes desse mandato, a qual toma posse e mesmo sendo suplente alcança o feito de permanecer na Câmara durante todo o mandato. Um pouco mais de um ano depois em **`r MesAno(tovar_afast_posses$data_retorno[1])`** Tovar retorna a Câmara alegando o desejo de candidatar-se a Deputado Estadual nas eleições de 2014. Ivonete se afasta mas no mesmo dia é empossada novamente com a saída de Jóia Germano (ver abaixo). 
 
-#### Caso RODRIGO RAMOS (Out/2014 à Jan/2015)
+Os planos de Tovar se tornam realidade e em **`r MesAno(tovar_afast_posses$data_afastamento[2])`** ele se despede da Câmara Municipal seguindo para o legislativo estadual. Nesse ínterim, Anderson Maia (PSB) é empossado definitivamente como o mais novo vereador titular de Campina Grande, tendo demonstrado uma produtividade mensal diferenciada quando comparado com o próprio Tovar ou com Ivonete Ludgério que, por sua vez, foi pouco atuante na Câmara durante o mandato.
 
-#### Caso BUCHADA (Out/2014 à Fev/2015)
+```{r ementa_tempo_tovar}
+PlotEmentasPorMes(ementas_por_mes, tovar_afast_posses)
+```
 
-#### Caso SAULO NORONHA (Out/2014 à Ago/2015)
+#### Caso LAFITE
+```{r lafite_imgs, results='asis'}
+v = 'LAFITE - PSC'
+lafite_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, lafite_afast_posses, v)
+```
+<br style="clear: left;"/>
 
-#### Caso INÁCIO FALCÃO (Fev/2015 até o fim do mandato)
+```{r lafite_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, lafite_afast_posses)
+```
 
-#### Caso BRUNO CUNHA LIMA (Fev/2015 até o fim do mandato)
 
-#### Caso MARINALDO CARDOSO (Mar/2015 à Set/2015
+#### Caso LULA CABRAL
+```{r lula_imgs, results='asis'}
+v = 'LULA CABRAL - PRB'
+lula_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, lula_afast_posses, v)
+```
+<br style="clear: left;"/>
 
-#### Caso METUSELA AGRA (Abr/2015 à ...)
+```{r lula_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, lula_afast_posses)
+```
 
-#### Caso SGT REGIS (Jun/2015 à ...)
+#### Caso JOIA GERMANO
+```{r joia_imgs, results='asis'}
+v = 'JOIA GERMANO - PRP'
+joia_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, joia_afast_posses, v)
+```
+<br style="clear: left;"/>
+
+```{r joia_ementa_tempo}
+PlotEmentasPorMes(ementas_por_mes, joia_afast_posses) 
+```
+
+#### Caso GALEGO DO LEITE
+```{r galego_imgs, results='asis'}
+v = 'GALEGO DO LEITE - PMN'
+galego_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, galego_afast_posses, v)
+```
+<br style="clear: left;"/>
+
+```{r galego_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, galego_afast_posses)
+```
+
+#### Caso RODRIGO RAMOS
+```{r rodrigo_imgs, results='asis'}
+v = 'RODRIGO RAMOS - PMN'
+rodrigo_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, rodrigo_afast_posses, v)
+```
+<br style="clear: left;"/>
+
+```{r rodrigo_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, rodrigo_afast_posses)
+```
+
+#### Caso BUCHADA
+```{r buchada_imgs, results='asis'}
+v = 'BUCHADA - PTN'
+buchada_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, buchada_afast_posses, v)
+```
+<br style="clear: left;"/>
+
+```{r buchada_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, buchada_afast_posses)
+```
+
+#### Caso SAULO NORONHA
+```{r saulo_imgs, results='asis'}
+v = 'SAULO NORONHA - DEM'
+saulo_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, saulo_afast_posses, v)
+```
+<br style="clear: left;"/>
+
+```{r saulo_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, saulo_afast_posses)
+```
+
+#### Caso INÁCIO FALCÃO
+```{r inacio_imgs, results='asis'}
+v = 'INÁCIO FALCÃO - PSDB'
+inacio_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, inacio_afast_posses, v)
+```
+<br style="clear: left;"/>
+
+```{r inacio_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, inacio_afast_posses)
+```
+
+#### Caso BRUNO CUNHA LIMA
+```{r bruno_imgs, results='asis'}
+v = 'BRUNO CUNHA LIMA - PSDB'
+bruno_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, bruno_afast_posses, v)
+```
+<br style="clear: left;"/>
+
+```{r bruno_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, bruno_afast_posses)
+```
+
+#### Caso MARINALDO CARDOSO
+```{r marinaldo_imgs, results='asis'}
+v = 'MARINALDO CARDOSO - PRB'
+marinaldo_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, marinaldo_afast_posses, v)
+```
+<br style="clear: left;"/>
+
+```{r marinaldo_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, marinaldo_afast_posses)
+```
+
+#### Caso METUSELA AGRA
+```{r metusela_imgs, results='asis'}
+v = 'METUSELA AGRA - PMDB'
+metusela_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, metusela_afast_posses, v)
+```
+<br style="clear: left;"/>
+
+```{r metusela_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, metusela_afast_posses)
+```
+
+#### Caso SGT REGIS
+```{r sgt_imgs, results='asis'}
+v = 'SGT REGIS - PMN'
+sgt_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, sgt_afast_posses, v)
+```
+<br style="clear: left;"/>
+
+```{r sgt_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, sgt_afast_posses)
+```
