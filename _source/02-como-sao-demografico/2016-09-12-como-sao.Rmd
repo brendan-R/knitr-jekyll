@@ -46,10 +46,11 @@ vereadores = vereadores %>%
   mutate_at(vars(matches("nome|desc|sexo")), function(x) sapply(x, simpleCap))
 ```
 
-### Gênero
-A representação feminina no poder legislativo de Campina Grande se distancia da emancipação que testemunhamos em outras áreas. A participação das mulheres na legislatura 2013-2016 é de 0% quando observamos especificamente a bancada titular. Entre os suplentes que assumiram tivemos três mulheres.
+### Gênero, número e grau
 
-Campina Grande, uma cidade com 52,7% da população feminina e 54,3% de eleitoras não eleger mulheres para a bancada do legislativo é um indicativo de que apenas a lei, que obriga um mínimo de 30% de candidatas nos quadros dos partidos, é instrumento insuficiente para mudar a representação feminina na esfera política, sobretudo quando o jeito de fazer política partidária é marcado pelo patriarcalismo.
+Infelizmente, **não há mulheres entre os 23 vereadores eleitos para a legislatura 2013-2016**. Todos são homens. Entre os suplentes que assumiram, três mulheres foram ou são vereadoras.
+
+Essa baixa representação feminina contrasta com uma cidade com 53% da população feminina e 54% de eleitoras. E essa disparidade acontece apesar de a lei exigir um mínimo de 30% de candidatas nos quadros dos partidos.
 
 <!-- População feminina de CG = 52,7% de acordo com o Censo 2010 (IBGE) -->
 
@@ -69,9 +70,7 @@ p = hchart(sumario, "column", x = eleito, y = n, group = sexo) %>%
 p
 ```
 
-### Idade
-
-Embora a política seja aparentemente um dos poucos espaços de valorização da experiência cronológica de seus agentes públicos, as chamadas raposas velhas estão perdendo espaço no âmbito do poder legislativo local. Em parte porque considera-se o poder legislativo municipal como o primeiro degrau dessa escada. Na carreira política espera-se que os idosos já estejam ocupando outros postos de maior representatividade na escala de valores do mundo político/partidário. De qualquer forma, a cidade que tem 8% da população votante com mais de 70 anos, dispõe na atual legislatura de apenas um representante nessa faixa etária (menos de 3%). A maioria dos eleitos tem em torno de 50 anos e dois estão com idade inferior aos 30 anos.
+A maioria dos nossos representantes na câmara tem em torno de 50 anos, apenas dois vereadores com menos de 30 anos (Anderson Maia e Bruno Cunha Lima) e um com mais de 70 (Orlandino Farias).
 
 <!-- 13648 + 8921 -->
 
@@ -82,9 +81,7 @@ hchart(idades, color = "#B71C1C", name = "Idade") %>%
   hc_xAxis(title = "Faixa etária")
 ```
 
-### Grau de Formação
-
-Um terço dos vereadores desta legislatura tem curso superior completo. O grau de escolaridade mais comum é o ensino médio completo, representando 45% do total.
+Quanto à escolaridade, um terço dos vereadores desta legislatura tem curso superior completo. O grau de escolaridade mais comum é o ensino médio completo, representando 45% do total.
 
 ```{r vereador_formacao}
 sumario <- vereadores %>% 
@@ -112,9 +109,9 @@ p = hchart(sumario, "column", x = descricao_grau_instrucao, y = n, group = eleit
 p
 ```
 
-# Ocupação
+### Ocupação
 
-Adotar a política como profissão é uma postura que costuma ser discursivamente rechaçada pelos brasileiros, os quais contraditoriamente ajudam a manter os políticos no poder cada vez que os reelegem. Entre os reeleitos é comum apontar a vereança como ocupação principal *(ou única?)*. Na atual legislatura em Campina Grande há uma forte tendência em assumir como profissão o cargo de vereador. Confira as demais ocupações indicadas pelos parlamentares.
+Já quanto à ocupação que nossos representantes municipais declararam quando se candidataram, há uma tendência clara. A ocupação mais comum dos candidatos é… vereador. Embora vereador não seja uma profissão, e adotar a política como profissão não seja bem visto, uma parte dessas respostas pode se dever ao fato de que os vereadores tipicamente tentam reeleição. Em 2016, 21 dos 23 tentam, por exemplo.
 
 ```{r vereador_ocupacao}
 sumario <- vereadores %>% 
@@ -127,9 +124,9 @@ datatable(sumario, options = list(paging = F, info = F, searching = F), rownames
 
 ### Partido
 
-O voto de legenda não é uma tradição brasileira. Estamos distantes de sermos eleitores guiados pela bandeira partidária. Nosso voto está muito pautado pela identidade com a figura do candidato. É essa cultura que faz muitas vezes elegermos um partido para o executivo sem garantir uma base aliada representativa no legislativo. Votamos em pessoas e não nos partidos. Apesar desse comportamento do eleitor, os partidos e coligações são os donos dos votos e entram para as estatísticas
+Idealmente, os partidos representam os ideais de grupos políticos. Durante as eleições, esses partidos fazem também coligações para juntar força na mídia e, de novo idealmente, fortalecer um projeto conjunto. Na política municipal, os ideais nem sempre estão tão claros. Vejamos como é em Campina.
 
-Clicando nas coligações na figura abaixo você pode explorar a distribuição dos partidos dos vereadores eleitos.
+Clicando nas coligações na figura abaixo você pode explorar a distribuição dos partidos dos vereadores eleitos: 
 
 ```{r vereador_partido, include=FALSE}
 library(treemap)
@@ -153,7 +150,7 @@ hc_tm <- highchart() %>%
 hc_tm 
 ```
 
-O partido com maior número de eleitos é o PMDB. Em segundo lugar, com três candidatos temos o PSDB e curiosamente o PMN, o Partido da Mobilização Nacional, um partido que não tem deputados estaduais ou federais na Paraíba. Outros pontos que merecem observação na composição da câmara são a ausência do PT, e a coligação de partidos que são opostos no cenário nacional, como o PSC e PC do B. 
+O partido com maior número de eleitos é o PMDB. Em segundo lugar, com três candidatos temos o PSDB e curiosamente o PMN, o Partido da Mobilização Nacional, um partido que não tem deputados estaduais ou federais na Paraíba. Outros pontos que merecem observação na composição da câmara são a ausência do PT, e a coligação de partidos que são opostos no cenário nacional, como o PSC (Partido de Jair Bolsonaro) e PC do B. 
 
 Confira os partidos de todos os eleitos:
 
@@ -169,4 +166,5 @@ vereadores %>%
   datatable(options = list(paging = F, info = F), rownames = FALSE)
 ```
 <br/>
-No entanto, a organização partidária da Câmara mudou completamente em 2016, quer saber por quê? Confira em [Qual o seu partido?]({{ "/2016/09/qual-o-seu-partido.html" | prepend: site.baseurl }}).
+
+Um ponto importante: esses são os partidos dos eleitos. A organização partidária da Câmara mudou completamente em 2016. Confira em [Qual o seu partido?]({{ "/2016/09/qual-o-seu-partido.html" | prepend: site.baseurl }}).

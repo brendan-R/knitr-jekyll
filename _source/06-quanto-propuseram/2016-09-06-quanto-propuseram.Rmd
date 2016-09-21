@@ -12,6 +12,9 @@ knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
 
 library(highcharter, warn.conflicts = F, quietly = T)
 library(dplyr, warn.conflicts = F, quietly = T)
+library(ggplot2)
+library(plotly)
+theme_set(theme_bw())
 
 current_dir = getwd()
 setwd(Sys.getenv("VEREADOR_DIR"))
@@ -33,12 +36,11 @@ all_ementas_month_year = get_ementas_all(start_camara_db()) %>%
 
 ```
 
-### Proposições anualmente
+### Proposições ano a ano
 
-Analisando a eficiência da Câmara nessa legislatura em termos do número de proposições aprovadas por ano percebemos um fato interessante: a quantidade de ementas **diminuiu** consistentemente com o passar dos anos. A produtividade dos vereadores cai de tal forma que se continuar como está podemos prever que 2016 terminará com pouco mais que 50% do número de ementas aprovadas no 1º ano![^footnote-dia-coleta]
+Quanto a nossa câmara produz por ano? Nessa legislatura, **a quantidade de ementas por ano diminuiu consistentemente com o passar dos anos**. A produtividade dos vereadores cai de tal forma que se continuar como está **teremos em 2016 pouco mais que metade do número de ementas aprovadas no 1º ano deste mandato!**[^footnote-dia-coleta]
 
 ```{r ementas_por_ano}
-
 ano_count = all_ementas_month_year %>% 
     count(Ano) %>% 
     ungroup()
@@ -50,38 +52,52 @@ highchart() %>%
   hc_yAxis(plotLines = list(
     list(
           value = as.integer(ano_count$n[1]/2),
-          color = 'green',
-          width = 2,
+          color = 'darkred',
+          width = 1,
           zIndex = 4,
           dashStyle = 'dash',
           label = list(text = "50% do 1º ano de Mandato", 
-                       style = list(fontWeight = "bold", color = 'green')
+                       style = list(fontWeight = "bold", color = 'darkred')
           )))) %>% 
-  hc_add_series(name = "Ementas", showInLegend = F, 
+  # hc_add_series(name = "Ementas", showInLegend = F, 
+  #               data = ano_count$n) %>% 
+  hc_add_series(name = "Ementas", type = "area", showInLegend = F, 
                 data = ano_count$n) %>% 
   hc_add_series(name = "Ementas", type = "line", showInLegend = F, 
                 data = ano_count$n)
 
 ```
 
-Uma das possíveis explicações para esse fato é a recandidatura de praticamente todos os vereadores em 2016 (ver post [Qual o seu partido?]({{ "/2016/09/qual-o-seu-partido.html" | prepend: site.baseurl }}), o que naturalmente acarreta em compromissos inevitáveis fora da Câmara. Mas, além disso, existe um fato que impacta nossa Câmara anualmente, a quantidade e a formatação das férias.
+Uma das possíveis explicações para esse fato é a recandidatura de praticamente todos os vereadores em 2016 (ver post [Qual o seu partido?]({{ "/2016/09/qual-o-seu-partido.html" | prepend: site.baseurl }}), o que naturalmente acarreta em mais compromissos fora da Câmara. Mas, além disso, existe outro fato que impacta nossa Câmara anualmente: a quantidade e a formatação das férias.
 
-### As Férias e o impacto nas proposições
-Por lei, todo vereador pode ter até 3 meses de férias por ano. Fazendo as contas, em 4 anos de mandato eles somarão 12 meses de férias, ou seja, apesar de serem eleitos para exercerem um mandato de 4 anos, só precisam trabalhar 3 anos! Como as Câmaras municipais tem autonomia para redefinir esse período, a Câmara de Campina Grande definiu em seu regimento **71 dias** de férias por ano dividido em dois períodos: do dia *23 de Dezembro* à *10 de Fevereiro* e do dia *20 de Junho* à *10 de Julho*.
+### As Férias
 
-Analisando o impacto das férias no número de proposições dos vereadores por mês[^footnote-dia-coleta], vemos quedas na eficiência parlamentar tanto nos meses das férias em si como também uma tendência nos meses anteriores a elas (Maio e Novembro). Ou seja, supondo uma redução no tempo de férias, ou ao menos a existência de um período único, poderíamos esperar um aumento na quantidade e, certamente, da qualidade do trabalho dos vereadores. 
+Por lei, **todo vereador pode ter até 3 meses de férias por ano**. Fazendo as contas, em 4 anos de mandato eles somarão 12 meses de férias, ou seja, apesar de serem eleitos para exercerem um mandato de 4 anos, só precisam trabalhar 3 anos. Como as Câmaras municipais tem autonomia para redefinir esse período, a Câmara de Campina Grande definiu em seu regimento **71 dias** de férias por ano dividido em dois períodos: do dia *23 de Dezembro* à *10 de Fevereiro* e do dia *20 de Junho* à *10 de Julho*.
 
-```{r ementas_por_mes_do_ano}
-ano_mes_count = all_ementas_month_year %>% count(Ano, Mes) %>% ungroup()
+Analisando o impacto das férias no número de proposições dos vereadores por mês[^footnote-dia-coleta], vemos quedas na eficiência parlamentar tanto nos meses das férias em si como também uma tendência nos meses anteriores a elas (Maio e Novembro). Ou seja, supondo uma redução no tempo de férias poderíamos esperar um aumento na quantidade de trabalho dos vereadores. 
 
-hc_plot = hchart(ano_mes_count, "column", x = Ano, y = n, group = Mes) %>% 
-  hc_yAxis(title = "") %>% 
-  hc_xAxis(title = "") %>% 
-  hc_title(text = "Nº de Ementas por Mês")
-hc_plot
+Ah, um ano que tem comportamento diferente é 2014. Neste ano, a baixa nas proposições não acontece em junho, e sim em setembro. Essa foi a época das eleições estaduais...
+
+```{r ementas_por_mes_do_ano, warning=FALSE, fig.height=10}
+ano_mes_count = all_ementas_month_year %>% 
+  count(Ano, Mes) %>% 
+  ungroup() %>% 
+  rename(Ementas = n)
+ano_mes_count$Ano = as.factor(ano_mes_count$Ano)
+
+p = ggplot(ano_mes_count, aes(x = Mes, y = Ementas, group = Ano)) + 
+  geom_area(fill = "darkgreen", alpha = 0.6) +
+  facet_grid(Ano ~ .)
+ggplotly(p)
+
+# theme_set(theme_minimal())
+# p = ggplot(ano_mes_count, aes(x = Mes, y = Ementas, label = Ano, group = Ano)) + 
+#   geom_line(alpha = 0.5, size = 1) 
+# ggplotly(p)
 ```
 
-[^footnote-dia-coleta]: Os dados que embasaram essa análise foram coletados no dia *12 de Agosto de 2016*, além disso as ementas demoram alguns dias para serem adicionadas no sistema da Câmara, então podemos esperar um aumento nas ementas para os meses reportados.
+
+[^footnote-dia-coleta]: Os dados que embasaram essa análise foram coletados no dia *12 de Agosto de 2016*, além disso as ementas demoram alguns dias para serem adicionadas no sistema da Câmara, então podemos esperar um aumento nas ementas para os últimos meses reportados.
 
 <!-- Mesmo sabendo que um vereador propõe mais do que outro, ou que a Câmara é menos ativa com o passar dos anos do mandato ainda resta uma dúvida, o que os vereadores estão propondo? As proposições tem alguma ligação com suas promessas de campanha? Confira mais detalhes no post [Qual o seu tema?]({{ "/2016/09/qual-o-seu-tema.html" | prepend: site.baseurl }})
  -->
