@@ -14,7 +14,7 @@ library(highcharter, warn.conflicts = F, quietly = T)
 library(dplyr, warn.conflicts = F, quietly = T)
 library(ggplot2)
 library(plotly)
-theme_set(theme_bw())
+theme_set(theme_minimal())
 
 current_dir = getwd()
 setwd(Sys.getenv("VEREADOR_DIR"))
@@ -38,7 +38,7 @@ all_ementas_month_year = get_ementas_all(start_camara_db()) %>%
 
 ### Proposições ano a ano
 
-Quanto a nossa câmara produz por ano? Nessa legislatura, **a quantidade de ementas por ano diminuiu consistentemente com o passar dos anos**. A produtividade dos vereadores cai de tal forma que se continuar como está **teremos em 2016 pouco mais que metade do número de ementas aprovadas no 1º ano deste mandato!**[^footnote-dia-coleta]
+Quanto a nossa câmara produz por ano? Nessa legislatura, **a quantidade de ementas por ano diminuiu consistentemente com o passar dos anos**. A produtividade dos vereadores cai de tal forma que se continuar como está **teremos em 2016 pouco mais que metade do número de ementas aprovadas no 1º ano deste mandato.**[^footnote-dia-coleta]
 
 ```{r ementas_por_ano}
 ano_count = all_ementas_month_year %>% 
@@ -76,9 +76,9 @@ Por lei, **todo vereador pode ter até 3 meses de férias por ano**. Fazendo as 
 
 Analisando o impacto das férias no número de proposições dos vereadores por mês[^footnote-dia-coleta], vemos quedas na eficiência parlamentar tanto nos meses das férias em si como também uma tendência nos meses anteriores a elas (Maio e Novembro). Ou seja, supondo uma redução no tempo de férias poderíamos esperar um aumento na quantidade de trabalho dos vereadores. 
 
-Ah, um ano que tem comportamento diferente é 2014. Neste ano, a baixa nas proposições não acontece em junho, e sim em setembro. Essa foi a época das eleições estaduais...
+Ah, um ano que tem comportamento diferente é 2014. Neste ano, a baixa nas proposições não acontece em junho, e sim em setembro. Essa foi a época das eleições estaduais.
 
-```{r ementas_por_mes_do_ano, warning=FALSE, fig.height=10}
+```{r ementas_por_mes_do_ano, warning=FALSE}
 ano_mes_count = all_ementas_month_year %>% 
   count(Ano, Mes) %>% 
   ungroup() %>% 
@@ -87,6 +87,7 @@ ano_mes_count$Ano = as.factor(ano_mes_count$Ano)
 
 p = ggplot(ano_mes_count, aes(x = Mes, y = Ementas, group = Ano)) + 
   geom_area(fill = "darkgreen", alpha = 0.6) +
+  labs(x = "Mês", y = "Número de Ementas aprovadas", title = "Ementas ao longo dos meses") + 
   facet_grid(Ano ~ .)
 ggplotly(p)
 
@@ -97,7 +98,7 @@ ggplotly(p)
 ```
 
 
-[^footnote-dia-coleta]: Os dados que embasaram essa análise foram coletados no dia *12 de Agosto de 2016*, além disso as ementas demoram alguns dias para serem adicionadas no sistema da Câmara, então podemos esperar um aumento nas ementas para os últimos meses reportados.
+[^footnote-dia-coleta]: Os dados que embasaram essa análise foram coletados no dia *12 de Agosto de 2016*. Além disso, as ementas demoram alguns dias para serem adicionadas no sistema da Câmara, então podemos esperar um aumento nas ementas para os últimos meses reportados. Caso os vereadores mantenham o ritmo que tiveram até agosto, terminarão 2016 com 1.851 ementas aprovadas.
 
 <!-- Mesmo sabendo que um vereador propõe mais do que outro, ou que a Câmara é menos ativa com o passar dos anos do mandato ainda resta uma dúvida, o que os vereadores estão propondo? As proposições tem alguma ligação com suas promessas de campanha? Confira mais detalhes no post [Qual o seu tema?]({{ "/2016/09/qual-o-seu-tema.html" | prepend: site.baseurl }})
  -->

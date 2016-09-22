@@ -24,6 +24,10 @@ setwd(current_dir)
 ```
 
 ```{r setup, include=FALSE} 
+cor_vermelho = '#d73027'
+cor_amarelo = '#fee090'
+cor_azul = '#91bfdb' 
+
 vereadores_part = tbl(start_camara_db(), sql(
     "select distinct c.nome_urna_candidato, c.sigla_partido, c.ano_eleicao, c.cpf_candidato, c.desc_sit_tot_turno
     from (
@@ -36,11 +40,24 @@ vereadores_part = tbl(start_camara_db(), sql(
     order by c.cpf_candidato, ano_eleicao, c.nome_urna_candidato")) %>% 
   collect()
 
-partido_espectro = read_csv("partido_espectro_ideologias.csv")
 # partido_espectro = read_csv("_source/08-qual-seu-partido/partido_espectro_ideologias.csv", )
+partido_espectro = read_csv("partido-ideologias-observatorio_das_elites.csv")
+partido_espectro[partido_espectro$sigla_partido == "PSD*", "sigla_partido"] = "PSD"
+partido_espectro = rbind(partido_espectro, 
+                         data.frame(sigla_partido = "PMB", 
+                                    nome_partido = "Partido da Mulher Brasileira", 
+                                    ideologia_simplificada = "centro", 
+                                    ideologia_nuancada = NA, 
+                                    ideol_tamanho_partido = NA))
+partido_espectro = partido_espectro %>% 
+  rowwise() %>%
+  mutate(cor_espectro = switch(ideologia_simplificada, 
+                               "centro" = cor_amarelo, 
+                               "esquerda" = cor_vermelho, 
+                               "direita" = cor_azul))
 
 part_table = vereadores_part %>% 
-  inner_join(partido_espectro %>% select(sigla_partido, cor_espectro), by = "sigla_partido") %>% 
+  left_join(partido_espectro %>% select(sigla_partido, cor_espectro), by = "sigla_partido") %>% 
   mutate(partido_cor = paste0(cor_espectro, " - ", sigla_partido)) %>% 
   group_by(cpf_candidato) %>% 
   mutate(nome_urna_candidato = nome_urna_candidato[ano_eleicao == 2012]) %>% 
@@ -52,28 +69,15 @@ part_table = vereadores_part %>%
                     str_replace_all(" ", "_") %>% paste0("{{ site.baseurl }}/img/vereadores_photos/", ., ".jpg"))
 
 part_table[is.na(part_table)] = "---"
-
-cor_vermelho = '#ff3232' 
-cor_amarelo = '#e6e600' 
-cor_azul = '#3232ff' 
 ```
 
-A princípio, fazer parte de um partido político indica que uma pessoa pública compartilha de certa ideologia com os demais no partido. No entanto, em Campina Grande essas definições ideológicas parecem não se sustentar. 
+Em teoria, partido políticos indicam ideologias compartilhadas por seus integrantes. Contudo, ao observar os vereadores de Campina Grande constatamos que, no geral, **ou partidos políticos não estão relacionados com ideologia, ou os vereadores mudam de ideologia a todo tempo**.
 
-Listamos abaixo os vereadores que trabalharam na Câmara nesse mandato (2013 - 2016, eleitos ou suplentes que assumiram) e os partidos que eles fizeram parte nas eleições de 2008, 2012 e 2016. Além de nomearmos os partidos, colorimos as células baseando-nos na sua posição no espectro político segundo a a Wikipédia ([Lista de Partidos Políticos no Brasil](https://pt.wikipedia.org/wiki/Lista_de_partidos_pol%C3%ADticos_no_Brasil#Partidos_ativos)). 
+Abaixo nós listamos os vereadores que trabalharam na Câmara nesse mandato (2013 - 2016, eleitos ou suplentes que assumiram) e os seus partidos nas eleições de 2008, 2012 e 2016. Ao mencionar cada partido, colorimos a tabela de acordo com uma classificação simplificada da ideologia daquele partido obtida do [Observatório das Elites da UFPR](http://observatory-elites.org/elites-parlamentares-e-partidarias/).
 
-A cor <font color='`r cor_vermelho`'><b>vermelha</b></font> representa todos os partidos de extrema-esquerda, esquerda até esquerda-centro; a cor <font color='`r cor_amarelo`'><b>amarela</b></font> representa os partidos centrais e; a cor <font color='`r cor_azul`'><b>azul</b></font> os partidos de centro-direita e direita.
+Na tabela, vermelho (<font color='`r cor_vermelho`'>&#9635;</font>) representa todos os partidos de esquerda; amarelo (<font color='`r cor_amarelo`'>&#9635;</font>) os partidos tradicionalmente de centro, e azul (<font color='`r cor_azul`'>&#9635;</font>) os partidos de direita. O vereador tem uma célula em cinza quando não participou da eleição municipal naquele ano.
 
-Essa tabela informa a situação de nossa Câmara por vários ângulos. 
-
-Inicialmente olhando a coluna de 2016, vemos que **quase todos** que atuaram como vereador são candidatos em 2016. Os que não são candidatos estão em cinza, e não são candidatos pelos seguintes motivos:
-
-* Tovar e Bruno Cunha lima: estão como Deputados Estaduais, eleitos em 2014;
-* Aragão Júnior é candidato a prefeito de Matinhas; 
-* Inácio Falcão é candidato a Vice de Adriano Galdino em Campina e; 
-* Murilo Galdino e Miguel da Construção abriram mão para lançar candidaturas de parentes: Murilo Galdino não se candidatou para ajudar na candidatura do irmão Adriano Galdino a prefeito de CG, e Miguel da Construção lançou a candidatura do seu filho Mychael da Construção.
-
-Além disso, os vereadores parecem dar pouca importância à ideologia do partido do qual farão parte. Em uma passada rápida pela tabela só observando as cores em cada linha, vemos várias vezes mudanças entre <font color='`r cor_azul`'><b>azul</b></font> e <font color='`r cor_amarelo`'><b>amarelo</b></font>, <font color='`r cor_amarelo`'><b>amarelo</b></font> e <font color='`r cor_vermelho`'><b>vermelho</b></font> e até entre <font color='`r cor_azul`'><b>azul</b></font> e <font color='`r cor_vermelho`'><b>vermelho</b></font>, quando um vereador pula diretamente da esquerda para direita ou vice-versa. Ou seja, a mudança de cor na tabela mostra que o vereador não somente mudou de partido, mas mudou para um partido com raízes ideológicas completamente diferentes, muitas vezes com interesses políticos *rivais*.
+Em uma passada rápida pela tabela, vemos várias vezes mudanças entre partidos de direta e centro, centro e esquerda e -- mais notável -- entre partidos de esquerda e direita. Nestes casos, o vereador não somente mudou de partido, mas mudou para um partido com raízes ideológicas completamente diferentes. Ou os vereadores não dão importância à ideologia do partido do qual farão parte. 
 
 ```{r gera_table, results='asis'}
 
@@ -82,7 +86,7 @@ GetTableData = function(partido_cor){
     return (sprintf("<td style='text-align: center;font-size: 20px;' %s>%s</td>", 
                 ifelse(cor_part[1] != "---", 
                     sprintf("bgcolor='%s'", cor_part[1]), 
-                    "bgcolor='#b2b2b2'"),
+                    "bgcolor='#e0e0e0'"),
                 ifelse(cor_part[1] != "---", 
                     sprintf("<b>%s</b>", cor_part[2]), 
                     sprintf("<b>%s</b>", cor_part[1])))) 
@@ -137,4 +141,20 @@ result = sprintf("
  
 cat(result %>% str_replace_all("\n", " ") %>% str_replace_all(" * ", " ") %>% str_trim()) 
 ```
+
+```{r}
+variaram = vereadores_part %>% select(nome_urna_candidato, sigla_partido) %>% distinct() %>% count(nome_urna_candidato) %>% filter(n == 3) 
+variaram_str = paste(variaram$nome_urna_candidato, collapse = ', ')
+```
+
+<br>
+
+É interessante notar também que **`r NROW(variaram)` vereadores tiveram 3 partidos diferentes em 3 eleições seguidas**. São eles: `r variaram_str`.
+
+Outro ponto que reparamos na tabela é que **quase todos que atuaram como vereador recentemente são candidatos em 2016**. Os poucos que não são candidatos estão em cinza, e não são candidatos pelos seguintes motivos:
+
+* Tovar e Bruno Cunha lima: estão atualmente Deputados Estaduais, eleitos em 2014;
+* Aragão Júnior é candidato a prefeito de Matinhas; 
+* Inácio Falcão é candidato a Vice de Adriano Galdino em Campina e; 
+* Murilo Galdino e Miguel da Construção abriram mão para lançar candidaturas de parentes: Murilo Galdino não se candidatou para ajudar na candidatura do irmão Adriano Galdino a prefeito de CG, e Miguel da Construção lançou a candidatura do seu filho Mychael da Construção.
 
