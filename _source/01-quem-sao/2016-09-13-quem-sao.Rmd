@@ -46,8 +46,8 @@ cat(vereadores2list(vereadores_eleitos))
 
 <br style="clear: left;"/>
 
-<!-- Apesar de eleitos, nem todos conduziram o mandato até o fim, alguns apesar dos votos conquistados em nome da promessa de desempenho exemplar na câmara de vereadores, priorizaram outros projetos. Quer saber quais e por quê? Confira o post [Por que se afastou?]({{ "/2016/09/por-que-se-afastou.html" | prepend: site.baseurl }}).
- -->
+Apesar de eleitos, nem todos conduziram o mandato até o fim, alguns apesar dos votos conquistados em nome da promessa de desempenho exemplar na câmara de vereadores, priorizaram outros projetos. Quer saber quais e por quê? Confira o post [Por que se afastou?]({{ "/2016/09/por-que-se-afastou.html" | prepend: site.baseurl }}).
+
 
 ### Os suplentes que saíram da reserva
 
@@ -63,5 +63,5 @@ cat(vereadores2list(vereadores_suplentes))
 
 <br style="clear: left;"/>
 
-<!-- Quer saber quantas vezes e durante quanto tempo cada suplente assumiu a vereança? O post [Por que se afastou?]({{ "/2016/09/por-que-se-afastou.html" | prepend: site.baseurl }}) esclarecerá suas dúvidas.
- -->
+Quer saber quantas vezes e durante quanto tempo cada suplente assumiu a vereança? O post [Por que se afastou?]({{ "/2016/09/por-que-se-afastou.html" | prepend: site.baseurl }}) esclarecerá suas dúvidas.
+

@@ -68,7 +68,7 @@ highchart() %>%
 
 ```
 
-Uma das possíveis explicações para esse fato é a recandidatura de praticamente todos os vereadores em 2016 (ver post [Qual o seu partido?]({{ "/2016/09/qual-o-seu-partido.html" | prepend: site.baseurl }}), o que naturalmente acarreta em mais compromissos fora da Câmara. Mas, além disso, existe outro fato que impacta nossa Câmara anualmente: a quantidade e a formatação das férias.
+Uma das possíveis explicações para esse fato é a recandidatura de praticamente todos os vereadores em 2016 (ver post [Qual o seu partido?]({{ "/2016/09/qual-o-seu-partido.html" | prepend: site.baseurl }})), o que naturalmente acarreta em mais compromissos fora da Câmara. Mas, além disso, existe outro fato que impacta nossa Câmara anualmente: a quantidade e a formatação das férias.
 
 ### As Férias
 
@@ -90,11 +90,6 @@ p = ggplot(ano_mes_count, aes(x = Mes, y = Ementas, group = Ano)) +
   labs(x = "Mês", y = "Número de Ementas aprovadas", title = "Ementas ao longo dos meses") + 
   facet_grid(Ano ~ .)
 ggplotly(p)
-
-# theme_set(theme_minimal())
-# p = ggplot(ano_mes_count, aes(x = Mes, y = Ementas, label = Ano, group = Ano)) + 
-#   geom_line(alpha = 0.5, size = 1) 
-# ggplotly(p)
 ```
 
 
