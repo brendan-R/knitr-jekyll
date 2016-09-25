@@ -129,7 +129,7 @@ cat(vereadores2list(veread_eleitos_img))
 
 ### Casos de Afastamento e Posse de 2013 à 2016
 
-Contamos a seguir os casos afastamentos e posses (em ordem cronológica), aproveitamos também para questionar a produtividade em termos de proposições dos vereadores titulares vs. seus reservas.
+Contamos a seguir as histórias dos vereadores que se afastaram da Cãmara e quem foi empossado em ordem cronológica durante o mandato. Aproveitamos também para questionar a produtividade em termos do número de ementas dos vereadores titulares vs. seus suplentes.
 
 ```{r aux_func}
 MesAno = function(date_val){
@@ -210,7 +210,7 @@ v = 'LULA CABRAL - PRB'
 lula_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
 PrintTitularSuplenteImgs(afastados_img, lula_afast_posses, v)
 ```
-No mesmo dia que o vereador Lafite foi chamado, Lula Cabral também o é e segue para o cargo de Secretário de Cultura. Novamente reforçando o executivo e enfraquecendo o legislativo eleito pelo povo. Nesse período o vereador conhecido por Pastor Josimar do PRB assume o cargo e tenta fazer o seu melhor, mesmo assim vemos que a partir de Setembro de 2014 o rendimento dele cai chegando próximo de zero no mês de sua saída em **`r MesAno(lula_afast_posses$data_retorno[1])`**. Lula Cabral retorna também alegando vontade de reeleger-se em 2016. 
+No mesmo dia que o vereador Lafite foi chamado, Lula Cabral também o foi, nesse caso Lula seguiu para o cargo de Secretário de Cultura. Novamente reforçando o executivo e enfraquecendo o legislativo eleito pelo povo. Nesse período o vereador conhecido por Pastor Josimar do PRB assume o cargo e tenta fazer o seu melhor, mesmo assim vemos que a partir de Setembro de 2014 o rendimento dele cai chegando próximo de zero no mês de sua saída em **`r MesAno(lula_afast_posses$data_retorno[1])`**. Lula Cabral retorna também alegando vontade de reeleger-se em 2016. 
 
 ```{r lula_ementa_tempo, fig.height=5}
 PlotEmentasPorMes(ementas_por_mes, lula_afast_posses)
@@ -223,7 +223,7 @@ joia_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
 PrintTitularSuplenteImgs(afastados_img, joia_afast_posses, v)
 ```
 
-Joia Germano é mais um dos vereadores da coligação *Por Amor a Campina I* que envolveu os partidos de PSB, PRP, PSDB e PSD que se afasta da Câmara para exercer cargos no executivo. E dessa vez entra novamente na história Ivonete Ludgério. 
+Joia Germano é mais um dos vereadores da coligação *Por Amor a Campina I* (PSB, PRP, PSDB e PSD) que se afasta da Câmara para exercer cargos no executivo. E dessa vez entra novamente na história Ivonete Ludgério. 
 
 Como falamos anteriormente, em **`r MesAno(tovar_afast_posses$data_retorno[1])`** Tovar retorna para a Câmara alegando desejo de eleger-se Deputado Estadual, nesse momento Ivonete deveria retornar para a reserva, no entanto, o prefeito Romero Rodrigues convoca imediatamente Jóia Germano para exercer a Chefia de Gabinete (da mesma coligação que Tovar e Ivonete). Com isso Ivonete Ludgério (diga-se de passagem, a líder do governo na Câmara) se mantém na Câmara agora como suplente de Jóia Germano. 
 

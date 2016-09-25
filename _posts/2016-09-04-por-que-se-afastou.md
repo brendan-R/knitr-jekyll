@@ -22,7 +22,7 @@ Vejam abaixo os <font color='red'><b>13 vereadores</b></font> com casos de afast
 
 <br style="clear: left;"/>
 
-### Contando Casos de Afastamento e Posses
+### Casos de Afastamento e Posse de 2013 à 2016
 
 Contamos a seguir os casos afastamentos e posses (em ordem cronológica), aproveitamos também para questionar a produtividade em termos de proposições dos vereadores titulares vs. seus reservas.
 
