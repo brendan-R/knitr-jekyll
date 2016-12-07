@@ -1,0 +1,105 @@
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Perfil de vereadores
+
+#### Propostas legislativas, desconsiderando nomes, medalhas e títulos (valores absolutos)
+```{r, echo=FALSE, include=FALSE}
+library(knitr)
+current_dir = getwd()
+setwd(Sys.getenv("VEREADOR_DIR"))
+source("server.R")
+source("vereadores_logic.R")
+setwd(current_dir)
+
+ementas = get_ementas_all(start_camara_db())
+
+library(fmsb)
+library(ggradar)
+```
+```{r, fig.height=3, fig.width=10, echo=FALSE, warning=FALSE, message=FALSE}
+simpleCap <- function(x) {
+    s <- strsplit(x, " ")[[1]]
+    paste(toupper(substring(s, 1, 1)),
+          tolower(substring(s, 2)),
+          sep = "",
+          collapse = " ")
+  }
+
+get_vereadores_para_ui = function(db) {
+  vereadores = get_vereadores(db) %>%
+    mutate(eleito = ifelse(grepl("^ELEITO", desc_sit_tot_turno),
+                           "Eleito",
+                           "Suplente"),
+           sexo = descricao_sexo)
+
+  vereadores = vereadores %>%
+    mutate_at(vars(matches("nome|desc|sexo")), function(x)
+      sapply(x, simpleCap))
+
+  return(vereadores)
+}
+
+
+camara_db <- start_camara_db()
+vereadores = get_vereadores_para_ui(camara_db)
+ementas = get_ementas_all(camara_db, not_older_than = 2013)
+
+epv = data.frame() # Ementas por vereador
+for (v in vereadores$sequencial_candidato) {
+  desse_vereador = get_ementas_por_vereador(camara_db, v, 2012)
+  epv = rbind(epv, desse_vereador)
+}
+epv = epv %>% filter(proponents != "Romero Rodrigues Veiga")
+
+
+atos.tema.legislativo = epv %>% 
+  subset(tipo_ato == "Legislativo" & !grepl("DENOMINA DE.*RUA|CONCEDE MEDALHA|TÍTULO DE CID", title)) %>%
+  mutate(nome_urna_candidato = sapply(nome_urna_candidato, simpleCap)) %>% 
+  left_join(select(vereadores, nome_urna_candidato),
+            by = c("nome_urna_candidato")) %>% 
+  rename(Vereador = nome_urna_candidato) %>% 
+  group_by(Vereador) %>% 
+  summarise(Administração = as.numeric(sum(main_theme == "administração")), 
+            Agricultura = as.numeric(sum(main_theme == "agricultura")), 
+            `Assistência Social` = as.numeric(sum(main_theme == "assistencia social")),
+            `Educação e Cultura` = as.numeric(sum(main_theme == "educação e cultura")),
+            `Gestão e Finanças` = as.numeric(sum(main_theme == "gestão e finanças")),
+            Mobilidade = as.numeric(sum(main_theme == "mobilidade")),
+            `Obras e Infr. Física` = as.numeric(sum(main_theme == "obras e infraestrutura física")),
+            Saúde = as.numeric(sum(main_theme == "saúde")),
+            `Segurança e Meio Amb.` = as.numeric(sum(main_theme == "segurança e meio ambiente")),
+            Outros = as.numeric(sum(main_theme == "outros")))
+
+
+atos.tema.legislativo=rbind(rep(6885,11) , rep(0,11) , atos.tema.legislativo)
+
+
+#  for(i in 3:nrow(atos.tema)){ 
+# radarchart( atos.tema[c(1,2,i), -1]  , axistype=1 , 
+#  
+#     #custom polygon
+#     pcol=rgb(0.2,0.5,0.5,0.9) , pfcol=rgb(0.2,0.5,0.5,0.5) , plwd=4 , 
+#  
+#     #custom the grid
+#     cglcol="grey", cglty=1, axislabcol="grey", caxislabels=seq(0,20,5), cglwd=0.8,
+#  
+#     #custom labels
+#     vlcex=0.8 
+#     )
+#  }
+ 
+ 
+par(mar=c(3,0,3,0))
+    par(mfrow=c(1,3))
+
+  for(i in 3:nrow(atos.tema.legislativo)){ 
+radarchart( atos.tema.legislativo[c(1,2,i), -1]  ,  cglcol = "grey80",  title =  atos.tema.legislativo$Vereador[i],  pcol=rgb(0.2,0.5,0.5,0.9) , pfcol=rgb(0.2,0.5,0.5,0.5) , plwd=2, vlcex=0.8 )
+  }
+
+
+#teste = data.frame( tipo = c("tipo1", "tipo2"), um = c(0.6, 0.3), dois=c(0.9,0.2), tres=c(0.5, 0.3), quatro = c(0.8, 0.5), todo =c(0, 1))
+#ggradar(teste)
+
+```
