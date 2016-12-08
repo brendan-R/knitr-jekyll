@@ -18,6 +18,7 @@ ementas = get_ementas_all(start_camara_db())
 library(fmsb)
 library(ggradar)
 ```
+
 ```{r, fig.height=3, fig.width=10, echo=FALSE, warning=FALSE, message=FALSE}
 simpleCap <- function(x) {
     s <- strsplit(x, " ")[[1]]
@@ -101,5 +102,25 @@ radarchart( atos.tema.legislativo[c(1,2,i), -1]  ,  cglcol = "grey80",  title = 
 
 #teste = data.frame( tipo = c("tipo1", "tipo2"), um = c(0.6, 0.3), dois=c(0.9,0.2), tres=c(0.5, 0.3), quatro = c(0.8, 0.5), todo =c(0, 1))
 #ggradar(teste)
+
+```
+
+#### Propostas legislativas, desconsiderando nomes, medalhas e títulos (valores relativos)
+
+```{r, fig.height=3, fig.width=10, echo=FALSE, warning=FALSE, message=FALSE}
+atos.legis.relativo = atos.tema.legislativo[3:nrow(atos.tema.legislativo), 2:11]/rowSums(atos.tema.legislativo[3:nrow(atos.tema.legislativo), 2:11])
+
+atos.legis.relativo = cbind(Vereador = atos.tema.legislativo$Vereador[3:nrow(atos.tema.legislativo)], atos.legis.relativo)
+
+
+atos.legis.relativo=rbind(rep(1,11) , rep(0,11) , atos.legis.relativo)
+
+par(mar=c(3,0,3,0))
+    par(mfrow=c(1,3))
+
+  for(i in 3:nrow(atos.legis.relativo)){ 
+radarchart( atos.legis.relativo[c(1,2,i), -1]  ,  cglcol = "grey80",  title =  atos.legis.relativo$Vereador[i],  pcol=rgb(0.8,0.2,0.5,0.9) , pfcol=rgb(0.8,0.2,0.5,0.4) , plwd=2, vlcex=0.8 )
+  }
+
 
 ```
