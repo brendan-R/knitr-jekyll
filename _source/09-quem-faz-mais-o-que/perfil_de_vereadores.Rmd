@@ -2,9 +2,8 @@
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-## Perfil de vereadores
+# Perfil de vereadores
 
-#### Propostas legislativas, desconsiderando nomes, medalhas e títulos (valores absolutos)
 ```{r, echo=FALSE, include=FALSE}
 library(knitr)
 current_dir = getwd()
@@ -17,6 +16,8 @@ ementas = get_ementas_all(start_camara_db())
 
 library(fmsb)
 library(ggradar)
+library(highcharter)
+
 ```
 
 ```{r, fig.height=3, fig.width=10, echo=FALSE, warning=FALSE, message=FALSE}
@@ -53,8 +54,9 @@ for (v in vereadores$sequencial_candidato) {
   epv = rbind(epv, desse_vereador)
 }
 epv = epv %>% filter(proponents != "Romero Rodrigues Veiga")
+```
 
-
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 atos.tema.legislativo = epv %>% 
   subset(tipo_ato == "Legislativo" & !grepl("DENOMINA DE.*RUA|CONCEDE MEDALHA|TÍTULO DE CID", title)) %>%
   mutate(nome_urna_candidato = sapply(nome_urna_candidato, simpleCap)) %>% 
@@ -73,54 +75,143 @@ atos.tema.legislativo = epv %>%
             `Segurança e Meio Amb.` = as.numeric(sum(main_theme == "segurança e meio ambiente")),
             Outros = as.numeric(sum(main_theme == "outros")))
 
+atividade.vereador = data.frame(Vereador=atos.tema.legislativo$Vereador, n=rowSums(atos.tema.legislativo[,2:NCOL(atos.tema.legislativo)]))
 
-atos.tema.legislativo=rbind(rep(6885,11) , rep(0,11) , atos.tema.legislativo)
-
-
-#  for(i in 3:nrow(atos.tema)){ 
-# radarchart( atos.tema[c(1,2,i), -1]  , axistype=1 , 
-#  
-#     #custom polygon
-#     pcol=rgb(0.2,0.5,0.5,0.9) , pfcol=rgb(0.2,0.5,0.5,0.5) , plwd=4 , 
-#  
-#     #custom the grid
-#     cglcol="grey", cglty=1, axislabcol="grey", caxislabels=seq(0,20,5), cglwd=0.8,
-#  
-#     #custom labels
-#     vlcex=0.8 
-#     )
-#  }
- 
- 
-par(mar=c(3,0,3,0))
-    par(mfrow=c(1,3))
-
-  for(i in 3:nrow(atos.tema.legislativo)){ 
-radarchart( atos.tema.legislativo[c(1,2,i), -1]  ,  cglcol = "grey80",  title =  atos.tema.legislativo$Vereador[i],  pcol=rgb(0.2,0.5,0.5,0.9) , pfcol=rgb(0.2,0.5,0.5,0.5) , plwd=2, vlcex=0.8 )
-  }
-
+atos.legis.relativo = atos.tema.legislativo[, 2:11]/rowSums(atos.tema.legislativo[, 2:11])
+atos.legis.relativo = cbind(Vereador = atos.tema.legislativo$Vereador, atos.legis.relativo)
+atos.legis.relativo=rbind(rep(1,11) , rep(0,11), atos.legis.relativo)
 
 #teste = data.frame( tipo = c("tipo1", "tipo2"), um = c(0.6, 0.3), dois=c(0.9,0.2), tres=c(0.5, 0.3), quatro = c(0.8, 0.5), todo =c(0, 1))
 #ggradar(teste)
 
 ```
 
-#### Propostas legislativas, desconsiderando nomes, medalhas e títulos (valores relativos)
+
+
+## Propostas legislativas, desconsiderando nomes, medalhas e títulos (valores relativos)
+
+### Como interpretar os gráficos
 
 ```{r, fig.height=3, fig.width=10, echo=FALSE, warning=FALSE, message=FALSE}
-atos.legis.relativo = atos.tema.legislativo[3:nrow(atos.tema.legislativo), 2:11]/rowSums(atos.tema.legislativo[3:nrow(atos.tema.legislativo), 2:11])
 
-atos.legis.relativo = cbind(Vereador = atos.tema.legislativo$Vereador[3:nrow(atos.tema.legislativo)], atos.legis.relativo)
+tutorial.chart = atos.legis.relativo[1:2, 2:NCOL(atos.legis.relativo)]
+tutorial.chart = rbind(tutorial.chart, rep(0,10), rep(1,10), c(0.25, 0, 0, 0.5, 0, 0,0.25, 0, 0, 0) ,rep(0.0,10))
 
-
-atos.legis.relativo=rbind(rep(1,11) , rep(0,11) , atos.legis.relativo)
+colors_border=c(rgb(0.7,0.5,0.1,0.9) , rgb(0.7,0.5,0.1,0.9))
+colors_in=c( rgb(0.7,0.5,0.1,0.4) , rgb(0.7,0.5,0.1,0.9))
 
 par(mar=c(3,0,3,0))
     par(mfrow=c(1,3))
+    
+for(i in 3:5){
+  radarchart(tutorial.chart[c(1,2,i,6),], axistype=1,
+                 pcol=colors_border , pfcol=colors_in, plwd=1, pty=c(16,32), plty=1,
+                  axislabcol="grey" , caxislabels=seq(0,100,25), cglcol = "grey80", cglty=1, cglwd=0.8,
+                  vlcex=0.8 )
+}
+```
 
-  for(i in 3:nrow(atos.legis.relativo)){ 
-radarchart( atos.legis.relativo[c(1,2,i), -1]  ,  cglcol = "grey80",  title =  atos.legis.relativo$Vereador[i],  pcol=rgb(0.8,0.2,0.5,0.9) , pfcol=rgb(0.8,0.2,0.5,0.4) , plwd=2, vlcex=0.8 )
-  }
+#### Atividade alta (#propostas >= 80)
+
+```{r, fig.height=3, fig.width=10, echo=FALSE, warning=FALSE, message=FALSE}
+
+par(mar=c(3,0,3,0))
+    par(mfrow=c(1,3))
+    
+for (i in as.numeric(row.names(atividade.vereador[atividade.vereador$n>=80,]))){
+    atual.vereador = atos.legis.relativo[c(1,2,i+2), -1]
+    atual.vereador = rbind(atual.vereador, rep(0,11))
+    
+    radarchart(atual.vereador, axistype=1,
+               pcol=colors_border , pfcol=colors_in, plwd=1, pty=c(16,32), plty=1,
+                axislabcol="grey" , caxislabels=seq(0,100,25), cglcol = "grey80", cglty=1, cglwd=0.8,
+                title =  atos.legis.relativo$Vereador[i+2], vlcex=0.8 )
+}
+```
+
+#### Atividade média (35 <= #prospostas < 80)
+
+```{r, fig.height=3, fig.width=10, echo=FALSE, warning=FALSE, message=FALSE}
+par(mar=c(3,0,3,0))
+    par(mfrow=c(1,3))
+    
+for (i in as.numeric(row.names(atividade.vereador[atividade.vereador$n<80 & atividade.vereador$n>=35,]))){
+    atual.vereador = atos.legis.relativo[c(1,2,i+2), -1]
+    atual.vereador = rbind(atual.vereador, rep(0,11))
+    
+    radarchart(atual.vereador, axistype=1,
+               pcol=colors_border , pfcol=colors_in, plwd=1, pty=c(16,32), plty=1,
+                axislabcol="grey" , caxislabels=seq(0,100,25), cglcol = "grey80", cglty=1, cglwd=0.8,
+                title =  atos.legis.relativo$Vereador[i+2], vlcex=0.8 )
+}
+```
+
+#### Atividade baixa ( #propostas < 35)
+
+```{r, fig.height=3, fig.width=10, echo=FALSE, warning=FALSE, message=FALSE}
+par(mar=c(3,0,3,0))
+    par(mfrow=c(1,3))
+    
+for (i in as.numeric(row.names(atividade.vereador[atividade.vereador$n<35,]))){
+    atual.vereador = atos.legis.relativo[c(1,2,i+2), -1]
+    atual.vereador = rbind(atual.vereador, rep(0,11))
+    
+    radarchart(atual.vereador, axistype=1,
+               pcol=colors_border , pfcol=colors_in, plwd=1, pty=c(16,32), plty=1,
+                axislabcol="grey" , caxislabels=seq(0,100,25), cglcol = "grey80", cglty=1, cglwd=0.8,
+                title =  atos.legis.relativo$Vereador[i+2], vlcex=0.8 )
+}
+```
+
+```{r, fig.height=3, fig.width=10, echo=FALSE, warning=FALSE, message=FALSE}
+
+# atos.legis.relativo = atos.tema.legislativo[, 2:11]/rowSums(atos.tema.legislativo[, 2:11])
+# 
+# atos.legis.relativo = cbind(Vereador = atos.tema.legislativo$Vereador, atos.legis.relativo)
+# 
+# 
+# atos.legis.relativo=rbind(rep(1,11) , rep(0,11), atos.legis.relativo)
+# # pcol=rgb(0.8,0.2,0.5,0.9) , pfcol=rgb(0.8,0.2,0.5,0.4)
+# 
+# colors_border=c(rgb(0.7,0.5,0.1,0.9) , rgb(0.7,0.5,0.1,0.9))
+# colors_in=c( rgb(0.7,0.5,0.1,0.4) , rgb(0.7,0.5,0.1,0.9))
+# 
+# par(mar=c(3,0,3,0))
+#     par(mfrow=c(1,3))
+# 
+#   for(i in 3:nrow(atos.legis.relativo)){ 
+#     atual.vereador = atos.legis.relativo[c(1,2,i), -1]
+#     atual.vereador = rbind(atual.vereador, rep(0,11))
+#     
+#     radarchart(atual.vereador, axistype=1,
+#                pcol=colors_border , pfcol=colors_in, plwd=1, pty=c(16,32), plty=1,
+#                 axislabcol="grey" , caxislabels=seq(0,100,25), cglcol = "grey80", cglty=1, cglwd=0.8,
+#                 title =  atos.legis.relativo$Vereador[i], vlcex=0.8 )
+#   }
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+atos.denomina.legislativo = epv %>% 
+  subset(tipo_ato == "Legislativo" & grepl("DENOMINA DE.*RUA|CONCEDE MEDALHA|TÍTULO DE CID", title)) %>%
+  mutate(nome_urna_candidato = sapply(nome_urna_candidato, simpleCap)) %>% 
+  left_join(select(vereadores, nome_urna_candidato),
+            by = c("nome_urna_candidato")) %>% 
+  rename(Vereador = nome_urna_candidato) %>% 
+  group_by(Vereador) %>% 
+  summarise(Administração = as.numeric(sum(main_theme == "administração")), 
+            Agricultura = as.numeric(sum(main_theme == "agricultura")), 
+            `Assistência Social` = as.numeric(sum(main_theme == "assistencia social")),
+            `Educação e Cultura` = as.numeric(sum(main_theme == "educação e cultura")),
+            `Gestão e Finanças` = as.numeric(sum(main_theme == "gestão e finanças")),
+            Mobilidade = as.numeric(sum(main_theme == "mobilidade")),
+            `Obras e Infr. Física` = as.numeric(sum(main_theme == "obras e infraestrutura física")),
+            Saúde = as.numeric(sum(main_theme == "saúde")),
+            `Segurança e Meio Amb.` = as.numeric(sum(main_theme == "segurança e meio ambiente")),
+            Outros = as.numeric(sum(main_theme == "outros")))
+
+nmt = data.frame(Vereador=atos.denomina.legislativo$Vereador, n=rowSums(atos.denomina.legislativo[,2:NCOL(atos.denomina.legislativo)]))
 
 
+p = hchart(nmt, "column", x = Vereador, y = n)
+p
 ```
