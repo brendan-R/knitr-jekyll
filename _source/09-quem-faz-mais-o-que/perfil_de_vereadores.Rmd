@@ -96,7 +96,7 @@ atos.legis.relativo=rbind(rep(1,11) , rep(0,11), atos.legis.relativo)
 #ggradar(teste)
 ```
 
-Durante os 4 anos em que estiveram no cargo, os vereadores puderam enviar propostas para aprovação que são classificadas em diferentes categorias dependendo de sua objetivo. Existe um total de 10 categorias e abaixo estaremos traçando o perfil de cada vereador baseada nas propostas aprovadas pelo mesmo.
+Durante os 4 anos em que estiveram no cargo, os vereadores puderam enviar propostas para aprovação que são classificadas em diferentes categorias dependendo de seus objetivos. Existe um total de 10 categorias e abaixo estaremos traçando o perfil dos vereadores baseado-se nas propostas aprovadas pelos mesmos.
 
 São levadas em conta as propostas legislativas aprovadas, excluindo aquelas referentes a nomeação, entrega de medalhas e títulos. Os gráficos mostram como ficaram distribuídas essas propostas para cada vereador, mostrando as categorias que apresentaram mais atividades, assim como aquelas que não foram trabalhadas.
 
@@ -218,9 +218,9 @@ for (i in order(selection[,12])){
 }
 ```
 
-* Vereadores com registro de atividades consideradas medianas acumularam um total de propostas com valores **inferiores a 35**.
+* Vereadores com registro de atividades consideradas baixas acumularam um total de propostas com valores **inferiores a 35**.
 
-* 3 vereadores tiveram 100% ou quase 100% de todas suas propostas aprovadas em apenas uma categoria: **Alcindor Villarim** (Saúde), **Lourdes Costa** (Administração) e **Rodolfo Rodrigues** (Administração).
+* 3 vereadores tiveram 100% ou quase 100% de todas suas propostas aprovadas voltadas para apenas uma categoria: **Alcindor Villarim** (Saúde), **Lourdes Costa** (Administração) e **Rodolfo Rodrigues** (Administração).
 
 # Ranking de vereadores
 
