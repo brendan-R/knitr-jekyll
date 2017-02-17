@@ -2,7 +2,8 @@
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-# Perfil de vereadores
+
+# Perfis de vereadores
 
 ```{r, echo=FALSE, include=FALSE}
 library(knitr)
@@ -51,7 +52,6 @@ get_vereadores_para_ui = function(db) {
   return(vereadores)
 }
 
-
 camara_db <- start_camara_db()
 vereadores = get_vereadores_para_ui(camara_db)
 ementas = get_ementas_all(camara_db, not_older_than = 2013)
@@ -87,17 +87,18 @@ atividade.vereador = data.frame(Vereador=atos.tema.legislativo$Vereador, n=rowSu
 
 atos.legis.relativo = atos.tema.legislativo[, 2:11]/rowSums(atos.tema.legislativo[, 2:11])
 atos.legis.relativo = cbind(Vereador = atos.tema.legislativo$Vereador, atos.legis.relativo)
-atos.legis.relativo = cbind(atos.legis.relativo, ordem = rowSums(atos.legis.relativo[,2:11]* atos.legis.relativo[,2:11]))
-atos.legis.relativo=rbind(rep(1,12) , rep(0,12), atos.legis.relativo)
+
+#atos.legis.relativo = cbind(atos.legis.relativo, ordem = rowSums(atos.legis.relativo[,2:11]* atos.legis.relativo[,2:11])) 
+
+atos.legis.relativo=rbind(rep(1,11) , rep(0,11), atos.legis.relativo)
 
 #teste = data.frame( tipo = c("tipo1", "tipo2"), um = c(0.6, 0.3), dois=c(0.9,0.2), tres=c(0.5, 0.3), quatro = c(0.8, 0.5), todo =c(0, 1))
 #ggradar(teste)
-
 ```
 
+Durante os 4 anos em que estiveram no cargo, os vereadores puderam enviar propostas para aprovação que são classificadas em diferentes categorias dependendo de sua objetivo. Existe um total de 10 categorias e abaixo estaremos traçando o perfil de cada vereador baseada nas propostas aprovadas pelo mesmo.
 
-
-## Propostas legislativas, desconsiderando nomes, medalhas e títulos (valores relativos)
+São levadas em conta as propostas legislativas aprovadas, excluindo aquelas referentes a nomeação, entrega de medalhas e títulos. Os gráficos mostram como ficaram distribuídas essas propostas para cada vereador, mostrando as categorias que apresentaram mais atividades, assim como aquelas que não foram trabalhadas.
 
 ### Como interpretar os gráficos
 
@@ -108,8 +109,8 @@ Logo abaixo temos três exemplos de como podemos interpretar os gráficos de per
 tutorial.chart = atos.legis.relativo[1:2, 2:NCOL(atos.legis.relativo)]
 tutorial.chart = rbind(tutorial.chart, rep(0,10), c(0, 0, 0, 0, 1, 0, 0, 0, 0, 0), c(0.25, 0, 0, 0.5, 0, 0,0.25, 0, 0, 0) ,rep(0.0,10))
 
-colors_border=c(rgb(0.8,0.2,0.5,0.9) , rgb(0.8,0.2,0.5,0.9))
-colors_in=c( rgb(0.8,0.2,0.5,0.4) , rgb(0.8,0.2,0.5,0.9))
+colors_border=c(rgb(8/255,48/255,107/255,0.9) , rgb(8/255,48/255,107/255,0.9))
+colors_in=c( rgb(8/255,48/255,107/255,0.4) , rgb(8/255,48/255,107/255,0.9))
 
 par(mar=c(3,0,3,0))
     par(mfrow=c(1,3))
@@ -125,57 +126,30 @@ for(i in 3:5){
 * O Exemplo 2 ilustra a situação em que um vereador teve todas as suas propostas aprovadas em apenas uma área. Repare que o ponto da categoria Gestão e Finanças atinge o valor 100% no gráfico, enquanto todos os outros permanecem no marco zero.
 * O Exemplo 3 ilustra a situação em que um vereador teve propostas aprovadas em diferentes categorias. Podemos notar no exemplo que 50% foram em Educação e Cultura, 25% em Administração, os outros 25% restantes em Obras e Infr. Física e os pontos das demais categorias se encontram no marco zero.
 
-#### Atividade alta (#propostas >= 80)
-
-```{r, fig.height=14, fig.width=16, echo=FALSE, warning=FALSE, message=FALSE}
-
-# fig.height=14, fig.width=16... 6x16
-
-
-
- #     myList = list()
- #     j = 0
- # for (i in as.numeric(row.names(atividade.vereador[atividade.vereador$n>=80,]))){
- #     atual.vereador = atos.legis.relativo[i+2,]
- #     j = j+1
- #    
- #    p = ggradar(atual.vereador, group.point.size = 4,  axis.label.size = 5, grid.label.size = 4, axis.label.offset = 0.8, grid.line.width = 0.5, gridline.min.linetype = "twodash", gridline.mid.linetype = "dotted", gridline.max.linetype = "twodash", legend.text.size = 3, gridline.mid.colour = "#007A87") + labs(title=atos.legis.relativo$Vereador[i+2]) + theme(legend.position="none", plot.title = element_text(size=20)) 
- # 
- #    myList[[j]] = p
- # 
- # }
- #     do.call(grid.arrange, c(myList, list(ncol=2)))
-
-```
+### Atividade alta
 
 ```{r, fig.height=3, fig.width=10, echo=FALSE, warning=FALSE, message=FALSE}
- 
-#fig.height=77, fig.width=16
-    
- #          myList = list()
- #     j = 0
- # for (i in as.numeric(row.names(atividade.vereador[atividade.vereador$n<35,]))){
- #     atual.vereador = atos.legis.relativo[i+2,]
- #     j = j+1
- # 
- #    p = ggradar(atual.vereador, group.point.size = 4,  axis.label.size = 5, grid.label.size = 4, axis.label.offset = 0.8, grid.line.width = 0.5, gridline.min.linetype = "twodash", gridline.mid.linetype = "dotted", gridline.max.linetype = "twodash", legend.text.size = 3, gridline.mid.colour = "#007A87") + labs(title=atos.legis.relativo$Vereador[i+2]) + theme(legend.position="none", plot.title = element_text(size=20))
- # 
- #    myList[[j]] = p
- # 
- # }
- #     do.call(grid.arrange, c(myList, list(ncol=2)))
 
-    
+distance2 = function(x1, allRows){
+  dist = c()
+  for (i in 1:NROW(allRows)){
+    temp = x1-allRows[i,]
+    temp = sum(temp*temp)
+    dist[i] = temp
+  }
+  return(dist)
+}
 
-colors_border=c(rgb(0.7,0.5,0.1,0.9) , rgb(0.7,0.5,0.1,0.9))
-colors_in=c( rgb(0.7,0.5,0.1,0.4) , rgb(0.7,0.5,0.1,0.9))
+selection = atos.legis.relativo[as.numeric(row.names(atividade.vereador[atividade.vereador$n>80,]))+2,]
+selection$ordem = distance2(selection[2,2:11], selection[,2:11])
+
+colors_border=c(rgb(35/255,139/255,69/255,0.9) , rgb(35/255,139/255,69/255,0.9))
+colors_in=c( rgb(35/255,139/255,69/255,0.4) , rgb(35/255,139/255,69/255,0.9))
+
 
  par(mar=c(3,0,3,0))
     par(mfrow=c(1,3))
 
-selection = atos.legis.relativo[as.numeric(row.names(atividade.vereador[atividade.vereador$n>=80,]))+2,]
-
-        
 for (i in order(selection[,12])){
     atual.vereador = rbind(rep(1,11), rep(0,11), selection[i,2:11], rep(0,11))
 
@@ -186,14 +160,23 @@ for (i in order(selection[,12])){
 }
 ```
 
+* Os três vereadores acima foram os que acumularam um maior número de propostas legislativas aprovadas (desconsiderando nomes, medalhas e títulos), com valores **acima de 80**.
 
-#### Atividade média (35 <= #prospostas < 80)
+* Bruno Cunha Lima conseguiu distribuir e balancear melhor suas propostas entre as categorias existentes.
+
+* Por outro lado, Pimentel Filho concentrou a maior parte de suas propostas aprovadas na categoria Administração, representando quase 75% do total.
+
+### Atividade média
 
 ```{r, fig.height=3, fig.width=10, echo=FALSE, warning=FALSE, message=FALSE}
+colors_border=c(rgb(0.7,0.5,0.1,0.9) , rgb(0.7,0.5,0.1,0.9))
+colors_in=c( rgb(0.7,0.5,0.1,0.4) , rgb(0.7,0.5,0.1,0.9))
+
 par(mar=c(3,0,3,0))
     par(mfrow=c(1,3))
 
 selection = atos.legis.relativo[as.numeric(row.names(atividade.vereador[atividade.vereador$n<80 & atividade.vereador$n>=35,]))+2,]
+selection$ordem = distance2(selection[1,2:11], selection[,2:11])
 
 for (i in order(selection[,12])){
     atual.vereador = rbind(rep(1,11), rep(0,11), selection[i,2:11], rep(0,11))
@@ -206,13 +189,23 @@ for (i in order(selection[,12])){
 }
 ```
 
-#### Atividade baixa ( #propostas < 35)
+* Todos os vereadores com registro de atividades consideradas medianas atuaram em pelo menos 5 áreas diferentes, cada um somou uma quantidade de **35 a 80** propostas aprovadas 
+
+* A maioria deles tiveram uma concentração de propostas na categoria **Administração**.
+
+* Apenas 3 deles não tiveram um destaque maior na categoria Administração, que foram: **Joia Germano** (Assistência Social), **Murilo Galdino** (Gestão e Finanças) e **Vaninho Aragão** (Educação e Cultura).
+
+### Atividade baixa
 
 ```{r, fig.height=3, fig.width=10, echo=FALSE, warning=FALSE, message=FALSE}
+colors_border=c(rgb(165/255,15/255,21/255,0.9) , rgb(165/255,15/255,21/255,0.9))
+colors_in=c( rgb(165/255,15/255,21/255,0.4) , rgb(165/255,15/255,21/255,0.9))
+
 par(mar=c(3,0,3,0))
     par(mfrow=c(1,3))
     
 selection = atos.legis.relativo[as.numeric(row.names(atividade.vereador[atividade.vereador$n<35,]))+2,]
+selection$ordem = distance2(selection[12,2:11], selection[,2:11])
 
 for (i in order(selection[,12])){
     atual.vereador = rbind(rep(1,11), rep(0,11), selection[i,2:11], rep(0,11))
@@ -225,54 +218,33 @@ for (i in order(selection[,12])){
 }
 ```
 
-```{r, fig.height=3, fig.width=10, echo=FALSE, warning=FALSE, message=FALSE}
+* Vereadores com registro de atividades consideradas medianas acumularam um total de propostas com valores **inferiores a 35**.
 
-# atos.legis.relativo = atos.tema.legislativo[, 2:11]/rowSums(atos.tema.legislativo[, 2:11])
-# 
-# atos.legis.relativo = cbind(Vereador = atos.tema.legislativo$Vereador, atos.legis.relativo)
-# 
-# 
-# atos.legis.relativo=rbind(rep(1,11) , rep(0,11), atos.legis.relativo)
-# # pcol=rgb(0.8,0.2,0.5,0.9) , pfcol=rgb(0.8,0.2,0.5,0.4)
-# 
-# colors_border=c(rgb(0.7,0.5,0.1,0.9) , rgb(0.7,0.5,0.1,0.9))
-# colors_in=c( rgb(0.7,0.5,0.1,0.4) , rgb(0.7,0.5,0.1,0.9))
-# 
-# par(mar=c(3,0,3,0))
-#     par(mfrow=c(1,3))
-# 
-#   for(i in 3:nrow(atos.legis.relativo)){ 
-#     atual.vereador = atos.legis.relativo[c(1,2,i), -1]
-#     atual.vereador = rbind(atual.vereador, rep(0,11))
-#     
-#     radarchart(atual.vereador, axistype=1,
-#                pcol=colors_border , pfcol=colors_in, plwd=1, pty=c(16,32), plty=1,
-#                 axislabcol="grey" , caxislabels=seq(0,100,25), cglcol = "grey80", cglty=1, cglwd=0.8,
-#                 title =  atos.legis.relativo$Vereador[i], vlcex=0.8 )
-#   }
-```
+* 3 vereadores tiveram 100% ou quase 100% de todas suas propostas aprovadas em apenas uma categoria: **Alcindor Villarim** (Saúde), **Lourdes Costa** (Administração) e **Rodolfo Rodrigues** (Administração).
+
+# Ranking de vereadores
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-atos.denomina.legislativo = epv %>% 
-  subset(tipo_ato == "Legislativo" & grepl("DENOMINA DE.*RUA|CONCEDE MEDALHA|TÍTULO DE CID", title)) %>%
-  mutate(nome_urna_candidato = sapply(nome_urna_candidato, simpleCap)) %>% 
-  left_join(select(vereadores, nome_urna_candidato),
-            by = c("nome_urna_candidato")) %>% 
-  rename(Vereador = nome_urna_candidato) %>% 
-  group_by(Vereador) %>% 
-  summarise(Administração = as.numeric(sum(main_theme == "administração")), 
-            Agricultura = as.numeric(sum(main_theme == "agricultura")), 
-            `Assistência Social` = as.numeric(sum(main_theme == "assistencia social")),
-            `Educação e Cultura` = as.numeric(sum(main_theme == "educação e cultura")),
-            `Gestão e Finanças` = as.numeric(sum(main_theme == "gestão e finanças")),
-            Mobilidade = as.numeric(sum(main_theme == "mobilidade")),
-            `Obras e Infr. Física` = as.numeric(sum(main_theme == "obras e infraestrutura física")),
-            Saúde = as.numeric(sum(main_theme == "saúde")),
-            `Segurança e Meio Amb.` = as.numeric(sum(main_theme == "segurança e meio ambiente")),
-            Outros = as.numeric(sum(main_theme == "outros")))
-
-nmt = data.frame(Vereador=atos.denomina.legislativo$Vereador, n=rowSums(atos.denomina.legislativo[,2:NCOL(atos.denomina.legislativo)]))
-
-p = hchart(nmt, "column", hcaes(x = Vereador, y = n))
-p
+# atos.denomina.legislativo = epv %>% 
+#   subset(tipo_ato == "Legislativo" & grepl("DENOMINA DE.*RUA|CONCEDE MEDALHA|TÍTULO DE CID", title)) %>%
+#   mutate(nome_urna_candidato = sapply(nome_urna_candidato, simpleCap)) %>% 
+#   left_join(select(vereadores, nome_urna_candidato),
+#             by = c("nome_urna_candidato")) %>% 
+#   rename(Vereador = nome_urna_candidato) %>% 
+#   group_by(Vereador) %>% 
+#   summarise(Administração = as.numeric(sum(main_theme == "administração")), 
+#             Agricultura = as.numeric(sum(main_theme == "agricultura")), 
+#             `Assistência Social` = as.numeric(sum(main_theme == "assistencia social")),
+#             `Educação e Cultura` = as.numeric(sum(main_theme == "educação e cultura")),
+#             `Gestão e Finanças` = as.numeric(sum(main_theme == "gestão e finanças")),
+#             Mobilidade = as.numeric(sum(main_theme == "mobilidade")),
+#             `Obras e Infr. Física` = as.numeric(sum(main_theme == "obras e infraestrutura física")),
+#             Saúde = as.numeric(sum(main_theme == "saúde")),
+#             `Segurança e Meio Amb.` = as.numeric(sum(main_theme == "segurança e meio ambiente")),
+#             Outros = as.numeric(sum(main_theme == "outros")))
+# 
+# nmt = data.frame(Vereador=atos.denomina.legislativo$Vereador, n=rowSums(atos.denomina.legislativo[,2:NCOL(atos.denomina.legislativo)]))
+# 
+# p = hchart(nmt, "column", hcaes(x = Vereador, y = n))
+# p
 ```
