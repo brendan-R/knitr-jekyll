@@ -89,20 +89,28 @@ h1, h2, h3, h4, h5, h6 {
  * Links
  */
 a {
-    color: $brand-color;
+    color: #e67e22;
+    font-weight: 400;
     text-decoration: none;
 
     &:visited {
-        color: darken($brand-color, 15%);
+        color: #e67e22;
     }
 
     &:hover {
-        color: $text-color;
-        text-decoration: underline;
+        color: #d35400;
+        text-decoration: none;
     }
 }
 
+a.inverse {
+    color: #fff;
 
+    &:hover {
+        color: $grey-color-light;
+        text-decoration: none;
+    }
+}
 
 /**
  * Blockquotes

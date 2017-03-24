@@ -1,0 +1,331 @@
+---
+layout: post
+title:  "Como é seu trabalho?"
+subtitle: "Proposições, moções e legislações"
+published: true
+categories: [análise]
+tags: [atos]
+---
+
+```{r load, include=FALSE}
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
+
+library(ggplot2)
+library(dplyr, warn.conflicts = F)
+library(plotly, warn.conflicts = F)
+library(DT)
+library(readr)
+
+anterior = getwd()
+setwd(Sys.getenv("VEREADOR_DIR"))
+source("vereadores_logic.R")
+source("data_access.R")
+source("server.R")
+setwd(anterior) 
+
+theme_set(theme_minimal(14))
+```
+
+```{r setup, include = FALSE}
+
+get_vereadores_para_ui = function(db) {
+  vereadores = get_vereadores(db) %>%
+    mutate(eleito = ifelse(grepl("^ELEITO", desc_sit_tot_turno),
+                           "Eleito",
+                           "Suplente"),
+           sexo = descricao_sexo)
+
+  simpleCap <- function(x) {
+    s <- strsplit(x, " ")[[1]]
+    paste(toupper(substring(s, 1, 1)),
+          tolower(substring(s, 2)),
+          sep = "",
+          collapse = " ")
+  }
+
+  vereadores = vereadores %>%
+    mutate_at(vars(matches("nome|desc|sexo")), function(x)
+      sapply(x, simpleCap))
+
+  return(vereadores)
+}
+
+camara_db <- start_camara_db()
+vereadores = get_vereadores_para_ui(camara_db)
+ementas = get_ementas_all(camara_db, not_older_than = 2013)
+
+epv = data.frame() # Ementas por vereador
+for (v in vereadores$sequencial_candidato) {
+  desse_vereador = get_ementas_por_vereador(camara_db, v, 2012)
+  epv = rbind(epv, desse_vereador)
+}
+epv = epv %>% filter(proponents != "Romero Rodrigues Veiga")
+```
+
+Boa parte da atuação de nossos vereadores se concentra em apresentar propostas de leis ou ações para a câmara e para o poder executivo. Grosso modo, podemos observar a atuação deles em duas frentes:
+
+* uma **legislativa** focada na criação e alteração de leis municipais, abrangendo desde a criação de conselhos, passando pela denominação de ruas, até diretrizes para políticas municipais, como na criação do Plano de Mobilidade de Campina Grande, e
+
+* uma **administrativa**, que se concentra em fiscalizar e requisitar medidas aos órgãos da prefeitura -- por exemplo, à Secretaria de Esporte e Juventude que crie uma academia em um bairro -- ou ações interna da própria câmara, tais como votos de aplauso ou pesar. 
+
+Desde o início da atual legislatura, nossa câmara analisou mais de 10.000 proposições. A enorme maioria são atos administrativos: 
+
+```{r plot_adm_vs_leg}
+e = ementas %>%
+  count(tipo_ato) %>%
+  rename("tipo" = tipo_ato, "quantos" = n)
+e$quando = "2013-2016"
+p = e %>%
+  ggplot() +
+  geom_point(aes(y = tipo, x = quando, size = quantos), colour = "darkblue", alpha = .8) +
+  scale_radius(range = c(5, 40)) +
+  theme(legend.position = "none") + 
+  labs(x = "", y = "")
+ggplotly(p)
+
+```
+
+<br/>
+
+Embora 10.000 proposições pareça um número alto, a câmara de João Pessoa, que tem apenas 4 vereadores a mais, analisou quase 30.000 proposições no mesmo período.
+
+### Sobre o que são as proposições?
+
+```{r tema_proposicoes, include=FALSE}
+library(RColorBrewer)
+library(NLP)
+library(wordcloud, warn.conflicts = F )
+library(tm, warn.conflicts = F)
+
+get_wordfreqs = function(ementas, filtro_tipo, wc_file){
+  d = NULL
+  if (file.exists(wc_file)) {
+    d = read_csv(wc_file, 
+                 col_types = cols(word = col_character(), 
+                                  freq = col_double()))
+  } else { 
+    para_cloud = ementas %>% filter(tipo_ato == filtro_tipo)
+    
+    crude = VCorpus(VectorSource(para_cloud$title)) %>% 
+      tm_map(removePunctuation) %>% 
+      tm_map(removeNumbers) %>% 
+      tm_map(content_transformer(tolower)) %>% 
+      tm_map(stripWhitespace) %>% 
+      tm_map(removeWords, c("município", "municipal", "campina", "grande", "outras", "providências", "dispõe")) %>%
+      tm_map(removeWords, stopwords("pt-br")) 
+    tdm <- TermDocumentMatrix(crude) 
+    
+    m <- as.matrix(tdm)
+    v <- sort(rowSums(m), decreasing = TRUE)
+    d <- data.frame(word = names(v), freq = v)
+    write_csv(d, wc_file)
+  }
+  return(d)
+}
+
+denominacoes_ruas = ementas %>% select(title) %>% filter(grepl("DENOMINA DE", title), grepl("RUA", title)) %>% NROW()
+denominacoes_outras = ementas %>% select(title) %>% filter(grepl("DENOMINA DE", title), !grepl("RUA", title)) %>% NROW()
+medalhas = ementas %>% select(title) %>% filter(grepl("CONCEDE MEDALHA", title)) %>% NROW()
+titulos = ementas %>% select(title) %>% filter(grepl("TÍTULO DE CID", title)) %>% NROW()
+```
+
+As palavras mais frequentes nos títulos das propostas são bastante diferentes entre os atos legislativos e administrativos. Esses são os termos mais comuns nas **propostas legislativas** apresentadas desde 2013:
+
+```{r wordcloud_leg, fig.width=12, fig.height=10}
+wc_file = "word-freq_precomputada_leg.csv"
+
+d = get_wordfreqs(ementas, "Legislativo", wc_file)
+d = d %>% filter(!(word %in% c("outras", "providências", "sobre")))
+
+wordcloud(d$word, 
+          sqrt(d$freq), 
+          min.freq = sqrt(15),
+          scale = c(5, .5), 
+          colors = brewer.pal(6, "OrRd")[3:6], 
+          random.order = FALSE)
+```
+
+A partir desses termos, conferimos que nas `r NROW(ementas %>% filter(tipo_ato == "Legislativo"))` propostas legislativas votadas desde 2013 há: 
+
+* `r denominacoes_ruas` que *denominam novas ruas* e mais `r denominacoes_outras` que *denominam* outros equipamentos públicos, 
+* `r medalhas` concessões de medalhas de honra e `r titulos` propostas sobre a concessão de títulos de cidadão campinense.
+
+As palavras mais frequentes nos títulos das propostas são diferentes entre os atos legislativos e administrativos. Esses são as palavras mais comuns para as **propostas administrativas** apresentadas desde 2013:
+
+```{r wordcloud_adm, fig.width=10, fig.height=9, warning=FALSE}
+wc_file = "word-freq_precomputada_adm.csv"
+
+d = get_wordfreqs(ementas, "Administrativo", wc_file)
+d = d %>% filter(!(word %in% c("outras", "providências", "sobre", "requer", "desta")))
+
+wordcloud(d$word, 
+          sqrt(d$freq), 
+          min.freq = sqrt(100),
+          scale = c(4, .2), 
+          colors = brewer.pal(6, "PuBu")[3:6], 
+          random.order = FALSE)
+
+conta_ementas = function(ementas, regex, tipo = "Administrativo"){
+  ementas %>% 
+    filter(tipo_ato == "Administrativo") %>% 
+    select(title) %>% 
+    filter(grepl(regex, title)) %>% 
+    NROW() 
+} 
+```
+
+Nessa nuvem vemos que ruas também são uma preocupação constante dos vereadores nas ações administrativas: 
+
+* temos `r conta_ementas(ementas, "CALÇAMENTO|PAVIMENTAÇÃO")` requerimentos envolvendo calçamento ou pavimentação, 
+* há `r conta_ementas(ementas, "REDUTOR.*VELOCIDADE")` pedidos de instalação de redutor de velocidade em Campina Grande
+
+Das secretarias que receberam atenção nos `r conta_ementas(ementas, "SECRETARIA DE")` pedidos dos vereadores feitos a secretarias da prefeitura, as mais populares são a STTP (`r conta_ementas(ementas, "SECRETARIA DE TRÂ|STTP")` requerimentos) e a Secretaria de Obras (`r conta_ementas(ementas, "SECRETARIA DE OBRAS")`).
+
+Por fim, há também nas requisições apresentadas `r conta_ementas(ementas, "VOTO|PESAR|MOÇÃO")` votos ou moções de aplauso, congratulações ou pesar.
+
+Comparativamente, temos `r conta_ementas(ementas, "EDUCAÇÃO")` requisições com a palavra "Educação" e `r conta_ementas(ementas, "SAÚDE")` que mencionam a palavra Saúde.
+
+### Quanto um vereador propõe?
+
+A produção e a produtividade de nossos vereadores não é igual. Primeiro olhamos o total produzido ao longo dos quatro anos, independente do tempo passado na câmara pelos vereadores. Para a atividade legislativa, separamos as propostas entre aquelas que versam sobre *nomes, medalhas e títulos (NMT)* e as demais, provavelmente mais relevantes. 
+
+Eis o ranking de nossos vereadores pelo total produzido na atividade legislativa:
+
+```{r calcula_atuacao, include=FALSE}
+simpleCap <- function(x) {
+    s <- strsplit(x, " ")[[1]]
+    paste(toupper(substring(s, 1, 1)),
+          tolower(substring(s, 2)),
+          sep = "",
+          collapse = " ")
+}
+
+atos = epv %>% 
+  mutate(nome_urna_candidato = sapply(nome_urna_candidato, simpleCap)) %>% 
+  left_join(select(vereadores, nome_urna_candidato, meses_atividade),
+            by = c("nome_urna_candidato")) %>% 
+  rename(Vereador = nome_urna_candidato, 
+         `Meses ativo` = meses_atividade) %>% 
+  group_by(Vereador, `Meses ativo`) %>% 
+  summarise(`Legislativa exceto NMT` = sum(tipo_ato == "Legislativo" & 
+                                              (!grepl("DENOMINA DE.*RUA|CONCEDE MEDALHA|TÍTULO DE CID", 
+                                                      title))), 
+            `Nomes, med. & tit.` = sum(tipo_ato == "Legislativo" & 
+                                         grepl("DENOMINA DE.*RUA|CONCEDE MEDALHA|TÍTULO DE CID", 
+                                               title)), 
+            Administrativo = sum(tipo_ato != "Legislativo" & (!grepl("VOTO|PESAR|MOÇÃO", title))), 
+            `Votos de aplauso e pesar` = sum(tipo_ato != "Legislativo" & 
+                                               grepl("VOTO|PESAR|MOÇÃO", title))
+  )
+
+library(tidyr)
+atosl = atos %>% 
+  gather(tipo, n, -Vereador, -`Meses ativo`) %>% 
+  mutate(`Prop. / mes` = n / `Meses ativo`) %>% 
+  ungroup()
+```
+
+
+```{r plot_leg, fig.height=11, fig.width=9}
+legislativos = atosl %>% 
+  filter(grepl("Leg|Nomes", tipo))
+
+o = legislativos %>% 
+  filter(tipo == "Legislativa exceto NMT") 
+ordem = order(o$n)
+
+ordena_fator = function(vec, ordem) {
+  factor(vec,
+         levels = levels(as.factor(vec))[ordem],
+         ordered = TRUE) %>%
+    return()
+}
+  
+legislativos$Vereador = ordena_fator(legislativos$Vereador, ordem)
+
+legislativos = legislativos %>%
+  rename(Quantas = n, Propostas = tipo)
+p = ggplot(legislativos) + 
+  geom_point(aes(x = Vereador, 
+                 y = Propostas, 
+                 size = Quantas, 
+                 colour = Propostas), alpha = 0.6) + 
+  labs(x = "", y = "", title = "Propostas legislativas") + 
+  scale_radius(range = c(1, 12)) +
+  scale_color_brewer(type = "qual", palette = 1) + 
+  theme(legend.position = "none") + 
+  coord_flip()
+ggplotly(p, tooltip = c("x", "y", "size"))
+```
+
+Alexandre do Sindicato é o vereador que mais apresentou propostas de leis exceto NMTs desde 2013. Pimentel Filho é o segundo colocado, sendo ao mesmo tempo campeão na categoria de denominações de ruas, medalhas e títulos de cidadão campinense. 
+
+Três vereadores apresentaram mais propostas NMT do que outros tipos de lei: João Dantas, Prof. Miguel Rodrigues e Alcindor Villarim. Este último tendo a maior diferença: 13 x 1. 
+
+Para propostas administrativas nosso ranking é diferente. Aqui também separamos as propostas entre as que são votos de aplauso ou moções de pesar e demais propostas administrativas:
+
+```{r plot_admins, fig.height=11, fig.width=9}
+admins = atosl %>% 
+  filter(grepl("Adm|Votos", tipo))
+
+o = admins %>% 
+  filter(tipo == "Administrativo") 
+ordem = order(o$n)
+
+admins$Vereador = ordena_fator(admins$Vereador, ordem)
+
+admins = admins %>%
+  rename(Quantas = n, Propostas = tipo)
+p = ggplot(admins) + 
+  geom_point(aes(x = Vereador, 
+                 y = Propostas, 
+                 size = Quantas, 
+                 colour = Propostas), alpha = 0.6) + 
+  labs(x = "", y = "", 
+       title = "Propostas administrativas") + 
+  scale_radius(range = c(1, 12)) +
+  theme(legend.position = "none") + 
+  scale_color_brewer(type = "qual", palette = 2) + 
+  coord_flip()
+ggplotly(p, tooltip = c("x", "y", "size"))
+```
+
+Prof Miguel Rodrigues é o vereador que mais apresentou propostas administrativas, e também o que mais apresentou votos de aplauso e moções de pesar. Alexandre do Sindicato, Bruno Cunha Lima e Pimentel Filho estão entre os que mais produziram tanto legislativamente quanto administrativamente.
+
+### E se contarmos o tempo na câmara?
+
+Como muitos vereadores suplentes assumiram desde 2013, temos vereadores que passaram períodos diferentes na câmara. Assim, é justo observarmos a **produtividade de propostas/mês** de nossos vereadores. 
+
+Abaixo analisamos a quantidade de propostas legislativas por mês dos vereadores, ignorando nomes, medalhes e títulos de cidadão. O tamanho do círculo reflete quantos meses o vereador atuou na câmara:
+
+```{r plot_prod, fig.height=11, fig.width=9}
+legislativos = atosl %>% 
+  filter(tipo == "Legislativa exceto NMT")
+
+o = legislativos %>% 
+  filter(tipo == "Legislativa exceto NMT") 
+ordem = order(o$`Prop. / mes`)
+
+legislativos$Vereador = ordena_fator(legislativos$Vereador, ordem)
+
+legislativos = legislativos %>%
+  rename(Propostas = tipo)
+
+p = ggplot(legislativos) + 
+  geom_point(aes(x = Vereador, 
+                 size = `Meses ativo`, 
+                 y = `Prop. / mes`), alpha = 0.5, 
+                 colour = "turquoise") + 
+  labs(x = "", y = "Propostas / mês", title = "Propostas legislativas / mês") + 
+  scale_radius(range = c(1, 10)) +
+  scale_color_brewer(type = "qual", palette = 3) + 
+  theme(legend.position = "none") + 
+  coord_flip()
+ggplotly(p, tooltip = c("x", "y", "size")) 
+```
+
+<br/> 
+
+Há grupos de vereadores com atuação bastante diferente. Lourdes Costa e Rodolfo Rodrigues são dois vereadores que passaram bem pouco tempo na Câmara, mas produziram bastante. Alexandre do Sindicato, Bruno Cunha Lima e Pimentel Filho passaram dois anos ou mais, e apresentaram entre 3 e 4 propostas legislativas por mês. Em seguida, há um grupo de Inácio Falcão a Miguel da Construção que apresentou entre 1.6 e 2.3 medidas por mês. 
+
+Rodrigo Ramos, Ivan Batista, Buchada, Orlandino Dias, Galego do Leite e Ivonete Ludgerio são exemplos de vereadores que estiveram por pelo menos 30 meses ativos, mas que apresentam *menos de uma proposta legislativa por mês* (excluindo denominações, medalhas e títulos de cidadão).

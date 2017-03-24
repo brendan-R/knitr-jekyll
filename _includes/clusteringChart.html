@@ -1,0 +1,15 @@
+<meta charset="utf-8">
+<body>
+<form class="form-inline well" >
+	<select id="aFazeresCluster" onclick="refazSvg()">
+	    <option value="tipo">Tipo</option>
+	    <option value="tema">Tema</option>
+	    <option value="situation">Situação</option>
+	</select>
+<input type="checkbox" name="ignorarRequerimentos" id="ignorarRequerimentos" onclick="refazSvg()"> Ignorar requerimentos
+</form>
+
+<div id='cluster' ></div>
+<script src="{{ "js/d3.v3.min.js"  | prepend: site.baseurl }}" charset="utf-8"></script>
+<link rel="stylesheet" href="{{ "css/clusterpurityChart.css"  | prepend: site.baseurl }}">
+<script src="{{ "js/clusterpurityChart.js" | prepend: site.baseurl }}"></script>

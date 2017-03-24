@@ -1,0 +1,67 @@
+---
+layout: post
+title:  "Quem são?"
+subtitle: "Os titulares e os reservas"
+published: true
+categories: [análise]
+tags: [vereadores, fotos]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
+
+library(dplyr, warn.conflicts = F)
+library(readr) 
+
+vereadores_eleitos = read_csv("vereadores_2012_eleitos_img-vector.csv", 
+                              col_names = F, 
+                              col_types = cols(.default = col_character()))
+vereadores_suplentes = read_csv("vereadores_2012_suplentes_img-vector.csv", 
+                                col_names = F,
+                                col_types = cols(.default = col_character()))
+
+```
+
+### Os eleitos para titularidade
+
+Campina Grande, como cidade com menos de 450 mil habitantes, compõe seu poder legislativo conforme prevê a Constituição Federal, com **23 vereadores**. Todos, enquanto agentes do poder legislativo, tem o mesmo desafio de representar os interesses da população, propondo leis para regular assuntos pautados como importantes para vida em sociedade e fiscalizando as ações do poder executivo.
+
+Relembre quem foram os eleitos como titulares do poder legislativo para o mandato 2013-2016. 
+ 
+```{r vereadores_titulares, results='asis'}
+vereadores2list = function(vereadores){
+  resposta = ""
+  for (v in 1:NROW(vereadores)){
+    resposta = paste(resposta, 
+                     sprintf("<div class='vereador'><div><img src='%s\' alt = '%s' width='100%%'/></div><p>%s</p></div>",
+            vereadores$X2[v],
+            vereadores$X1[v],
+            vereadores$X1[v]))
+  }
+  resposta
+}
+
+cat(vereadores2list(vereadores_eleitos))
+```
+
+<br style="clear: left;"/>
+
+Apesar de eleitos, nem todos conduziram o mandato até o fim, alguns apesar dos votos conquistados em nome da promessa de desempenho exemplar na câmara de vereadores, priorizaram outros projetos. Quer saber quais e por quê? Confira o post [Por que se afastou?]({{ "/2016/09/por-que-se-afastou.html" | prepend: site.baseurl }}).
+
+
+### Os suplentes que saíram da reserva
+
+Durante o mandato de 2013-2016, vários titulares cederam o espaço conquistado pelo voto diretor e secreto para os que estavam na fila de espera. Até setembro deste ano, **13 suplentes** assumiram a vereança ao menos uma vez.
+
+A legislação brasileira prevê a figura do vereador suplente como sendo aquele que a partir dos votos conquistados também pode ser convocado a assumir a titularidade em caso de vacância. Ele ocupa lugar em uma lista de espera. Não há restrições quanto à natureza da motivação para a abertura da vaga. O vereador titular pode sair por motivos de saúde, de natureza pessoal ou, como é bastante comum, para assumir cargo no executivo. Essa liberdade de ir e vir do vereador faz, muitas vezes, com que a vaga seja usada como moeda de troca.
+
+Saiba quem são os vereadores eleitos para suplência que assumiram a titularidade ao menos uma vez durante o mandato. 
+
+```{r vereadores_suplentes, results='asis'}
+cat(vereadores2list(vereadores_suplentes))
+```
+
+<br style="clear: left;"/>
+
+Quer saber quantas vezes e durante quanto tempo cada suplente assumiu a vereança? O post [Por que se afastou?]({{ "/2016/09/por-que-se-afastou.html" | prepend: site.baseurl }}) esclarecerá suas dúvidas.
+

@@ -1,0 +1,160 @@
+---
+layout: post
+title: "Qual o seu partido?"
+subtitle: "Questionando a constante mudança de partido pelos vereadores"
+published: true
+categories: [análise]
+tags: [partidos, reeleição]
+---
+
+```{r load, include=FALSE} 
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE) 
+
+library(dplyr, warn.conflicts = F, quietly = T)
+library(tidyr, warn.conflicts = F, quietly = T)
+library(readr, warn.conflicts = F, quietly = T)
+library(magrittr, warn.conflicts = F, quietly = T)
+library(stringi, warn.conflicts = F, quietly = T)
+library(stringr, warn.conflicts = F, quietly = T)
+
+current_dir = getwd()
+setwd(Sys.getenv("VEREADOR_DIR"))
+source("data_access.R")
+setwd(current_dir)
+```
+
+```{r setup, include=FALSE} 
+cor_vermelho = '#d73027'
+cor_amarelo = '#fee090'
+cor_azul = '#91bfdb' 
+
+vereadores_part = tbl(start_camara_db(), sql(
+    "select distinct c.nome_urna_candidato, c.sigla_partido, c.ano_eleicao, c.cpf_candidato, c.desc_sit_tot_turno
+    from (
+            select distinct c.cpf_candidato
+            from consulta_cand c, map_proponent_candidato m 
+            where c.sequencial_candidato = m.sequencial_candidato and m.ano_eleicao = 2012  and c.ano_eleicao in (2012) and c.descricao_cargo = 'VEREADOR'
+    ) cpfs,
+    consulta_cand c
+    where ano_eleicao in (2008, 2012, 2016) and cpfs.cpf_candidato = c.cpf_candidato and c.descricao_cargo = 'VEREADOR'
+    order by c.cpf_candidato, ano_eleicao, c.nome_urna_candidato")) %>% 
+  collect()
+
+# partido_espectro = read_csv("_source/08-qual-seu-partido/partido_espectro_ideologias.csv", )
+partido_espectro = read_csv("partido-ideologias-observatorio_das_elites.csv")
+partido_espectro[partido_espectro$sigla_partido == "PSD*", "sigla_partido"] = "PSD"
+partido_espectro = rbind(partido_espectro, 
+                         data.frame(sigla_partido = "PMB", 
+                                    nome_partido = "Partido da Mulher Brasileira", 
+                                    ideologia_simplificada = "centro", 
+                                    ideologia_nuancada = NA, 
+                                    ideol_tamanho_partido = NA))
+partido_espectro = partido_espectro %>% 
+  rowwise() %>%
+  mutate(cor_espectro = switch(ideologia_simplificada, 
+                               "centro" = cor_amarelo, 
+                               "esquerda" = cor_vermelho, 
+                               "direita" = cor_azul))
+
+part_table = vereadores_part %>% 
+  left_join(partido_espectro %>% select(sigla_partido, cor_espectro), by = "sigla_partido") %>% 
+  mutate(partido_cor = paste0(cor_espectro, " - ", sigla_partido)) %>% 
+  group_by(cpf_candidato) %>% 
+  mutate(nome_urna_candidato = nome_urna_candidato[ano_eleicao == 2012]) %>% 
+  ungroup() %>% 
+  select(nome_urna_candidato, partido_cor, ano_eleicao) %>% 
+  spread(ano_eleicao, partido_cor) %>%
+  mutate(nome_urna_candidato_img = nome_urna_candidato %>% stri_trans_general("LATIN-ASCII") %>%
+                    str_to_lower() %>% str_replace_all('[[:punct:]]', '') %>%
+                    str_replace_all(" ", "_") %>% paste0("{{ site.baseurl }}/img/vereadores_photos/", ., ".jpg"))
+
+part_table[is.na(part_table)] = "---"
+```
+
+Em teoria, partido políticos indicam ideologias compartilhadas por seus integrantes. Contudo, ao observar os vereadores de Campina Grande constatamos que, no geral, **ou partidos políticos não estão relacionados com ideologia, ou os vereadores mudam de ideologia a todo tempo**.
+
+Abaixo nós listamos os vereadores que trabalharam na Câmara nesse mandato (2013 - 2016, eleitos ou suplentes que assumiram) e os seus partidos nas eleições de 2008, 2012 e 2016. Ao mencionar cada partido, colorimos a tabela de acordo com uma classificação simplificada da ideologia daquele partido obtida do [Observatório das Elites da UFPR](http://observatory-elites.org/elites-parlamentares-e-partidarias/).
+
+Na tabela, vermelho (<font color='`r cor_vermelho`'>&#9635;</font>) representa todos os partidos de esquerda; amarelo (<font color='`r cor_amarelo`'>&#9635;</font>) os partidos tradicionalmente de centro, e azul (<font color='`r cor_azul`'>&#9635;</font>) os partidos de direita. O vereador tem uma célula em cinza quando não participou da eleição municipal naquele ano.
+
+Em uma passada rápida pela tabela, vemos várias vezes mudanças entre partidos de direta e centro, centro e esquerda e -- mais notável -- entre partidos de esquerda e direita. Nestes casos, o vereador não somente mudou de partido, mas mudou para um partido com raízes ideológicas completamente diferentes. Ou os vereadores não dão importância à ideologia do partido do qual farão parte. 
+
+```{r gera_table, results='asis'}
+
+GetTableData = function(partido_cor){
+    cor_part = str_split_fixed(partido_cor, ' - ', -1)[1,]
+    return (sprintf("<td style='text-align: center;font-size: 20px;' %s>%s</td>", 
+                ifelse(cor_part[1] != "---", 
+                    sprintf("bgcolor='%s'", cor_part[1]), 
+                    "bgcolor='#e0e0e0'"),
+                ifelse(cor_part[1] != "---", 
+                    sprintf("<b>%s</b>", cor_part[2]), 
+                    sprintf("<b>%s</b>", cor_part[1])))) 
+}
+
+table_header = "
+    <thead><tr><th style='text-align: center'>Vereador</th>
+            <th style='text-align: center'>2008</th>
+            <th style='text-align: center'>2012</th>
+            <th style='text-align: center'>2016</th>
+            </tr>
+    </thead>"
+
+table_rows = ""
+
+for (i in 1:nrow(part_table)) {
+    table_rows = paste0(table_rows, 
+                        sprintf("<tr>
+                                    <td style='text-align: center; width: 50px'>
+                                        <div class='vereador' style='width: 100%%'> 
+                                            <div>
+                                                <img src='%s\' alt = '%s' width='85%%'/>
+                                            </div>
+                                            <p>
+                                                %s
+                                            </p>
+                                        </div>
+                                    </td>
+                                    %s
+                                    %s
+                                    %s
+                                </tr>",   
+                                    part_table$nome_urna_candidato_img[i],
+                                    part_table$nome_urna_candidato[i], 
+                                    part_table$nome_urna_candidato[i], 
+                                    part_table$'2008'[i] %>% GetTableData(), 
+                                    part_table$'2012'[i] %>% GetTableData(), 
+                                    part_table$'2016'[i] %>% GetTableData()))
+}
+
+result = sprintf("
+<table align='center'>
+    %s
+   <col width='112'>
+   <col width='112'>
+   <col width='112'>
+   <col width='112'>
+    <tbody>
+        %s
+    </tbody>
+</table>", table_header, table_rows)
+ 
+cat(result %>% str_replace_all("\n", " ") %>% str_replace_all(" * ", " ") %>% str_trim()) 
+```
+
+```{r}
+variaram = vereadores_part %>% select(nome_urna_candidato, sigla_partido) %>% distinct() %>% count(nome_urna_candidato) %>% filter(n == 3) 
+variaram_str = paste(variaram$nome_urna_candidato, collapse = ', ')
+```
+
+<br>
+
+É interessante notar também que **`r NROW(variaram)` vereadores tiveram 3 partidos diferentes em 3 eleições seguidas**. São eles: `r variaram_str`.
+
+Outro ponto que reparamos na tabela é que **quase todos que atuaram como vereador recentemente são candidatos em 2016**. Os poucos que não são candidatos estão em cinza, e não são candidatos pelos seguintes motivos:
+
+* Tovar e Bruno Cunha lima: estão atualmente Deputados Estaduais, eleitos em 2014;
+* Aragão Júnior é candidato a prefeito de Matinhas; 
+* Inácio Falcão é candidato a Vice de Adriano Galdino em Campina e; 
+* Murilo Galdino e Miguel da Construção abriram mão para lançar candidaturas de parentes: Murilo Galdino não se candidatou para ajudar na candidatura do irmão Adriano Galdino a prefeito de CG, e Miguel da Construção lançou a candidatura do seu filho Mychael da Construção.
+

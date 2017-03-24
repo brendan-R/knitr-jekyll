@@ -4,20 +4,24 @@ layout: default
 
 <div class="home">
 
-  <h1 class="page-heading">Posts</h1>
+  <div class="wrapper">
+    <h1 class="page-heading">Nossos Vereadores, Campina Grande</h1>
+    <p class="page-subheading">Quem são, o que fazem, do que se alimentam e como nos representam</p>
+  </div>
 
-  <ul class="post-list">
+</div>
+
+<div class="home-posts">
+
+  <ul class="post-list clearfix">
     {% for post in site.posts %}
-      <li>
-        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
-
-        <h2>
-          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-        </h2>
+      <li class="post-link{{ forloop.index }}">
+        <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">
+          <!-- <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span> -->
+          <h2>{{ post.title }}</h2>
+        </a>
       </li>
     {% endfor %}
   </ul>
-
-  <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
 
 </div>

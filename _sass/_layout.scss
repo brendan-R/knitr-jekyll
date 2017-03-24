@@ -2,37 +2,57 @@
  * Site header
  */
 .site-header {
-    border-top: 5px solid $grey-color-dark;
-    border-bottom: 1px solid $grey-color-light;
-    min-height: 56px;
-
+    // border-top: 5px solid $grey-color-dark;
+    // border-bottom: 1px solid $grey-color-light;
+    background-color: $brand-color;
+    min-height: 65px;
+    padding: $spacing-unit/2 $spacing-unit*2;
     // Positioning context for the mobile navigation icon
     position: relative;
+
+    @include media-query($on-palm) {
+      padding: 0 $spacing-unit/2;
+    }
 }
 
 .site-title {
     font-size: 26px;
-    line-height: 56px;
+    line-height: 66px;
     letter-spacing: -1px;
     margin-bottom: 0;
     float: left;
+    color: #fff;
+    text-decoration: none;
+
+    @include media-query($on-palm) {
+      font-size: 18px;
+    }
 
     &,
     &:visited {
-        color: $grey-color-dark;
+        color: #fff;
+    }
+
+    > small {
+      font-size: 16px;
+      color: #eee;
+
+      @include media-query($on-palm) {
+        font-size: 12px;
+      }
     }
 }
 
 .site-nav {
     float: right;
-    line-height: 56px;
+    line-height: 66px;
 
     .menu-icon {
         display: none;
     }
 
     .page-link {
-        color: $text-color;
+        color: #fff;
         line-height: $base-line-height;
 
         // Gaps between nav items, but not on the first one
@@ -92,8 +112,10 @@
  * Site footer
  */
 .site-footer {
+    background-color: $background-color;
     border-top: 1px solid $grey-color-light;
-    padding: $spacing-unit 0;
+    padding: $spacing-unit*2 0;
+    color: #fff;
 }
 
 .footer-heading {
@@ -109,7 +131,6 @@
 
 .footer-col-wrapper {
     font-size: 15px;
-    color: $grey-color;
     margin-left: -$spacing-unit / 2;
     @extend %clearfix;
 }
@@ -161,22 +182,131 @@
 /**
  * Page content
  */
+.home {
+  padding: $spacing-unit*3;
+  background-color: $brand-color;
+  color: #fff;
+
+  @include media-query($on-palm) {
+    padding: $spacing-unit;
+  }
+}
+
+.home-posts {
+  background-color: lighten($brand-color, 25%);
+
+}
+
 .page-content {
-    padding: $spacing-unit 0;
+    // padding: $spacing-unit 0;
+    background-color: #fff;
 }
 
 .page-heading {
-    font-size: 20px;
+    font-size: 73px;
+    line-height: 1em;
+    margin: 0;
+    padding: $spacing-unit 0;
+    border-bottom: solid 2px #fff;
+
+    @include media-query($on-palm) {
+      font-size: 32px;
+    }
+}
+
+.page-subheading {
+  margin-top: $spacing-unit;
+  font-size: 18px;
+}
+
+.post {
+  padding-top: $spacing-unit;
+
+  a {
+    &:hover {
+      text-decoration: underline;
+    }
+
+  }
 }
 
 .post-list {
-    margin-left: 0;
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 0;
     list-style: none;
 
     > li {
-        margin-bottom: $spacing-unit;
+      float: left;
+      width: 25%;
+      height: 240px;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+
+      @include media-query($on-laptop) {
+        width: 50%;
+      }
+
+      @include media-query($on-palm) {
+        width: 100%;
+      }
+
     }
 }
+/* slightly enhanced, universal clearfix hack */
+.clearfix:after {
+     visibility: hidden;
+     display: block;
+     font-size: 0;
+     content: " ";
+     clear: both;
+     height: 0;
+     }
+.clearfix { display: inline-block; }
+/* start commented backslash hack \*/
+* html .clearfix { height: 1%; }
+.clearfix { display: block; }
+/* close commented backslash hack */
+
+.post-link-color1 { background-color: #9b59b6; }
+.post-link-color2 { background-color: #e74c3c; }
+.post-link-color3 { background-color: #3498db; }
+.post-link-color4 { background-color: #1abc9c; }
+.post-link-color5 { background-color: #f39c12; }
+.post-link-color6 { background-color: #27ae60; }
+
+.post-link1 { @extend .post-link-color1; }
+.post-link2 { @extend .post-link-color2; }
+.post-link3 { @extend .post-link-color3; }
+.post-link4 { @extend .post-link-color4; }
+.post-link5 { @extend .post-link-color5; }
+.post-link6 { @extend .post-link-color6; }
+.post-link7 { @extend .post-link-color1; }
+.post-link8 { @extend .post-link-color2; }
+.post-link9 { @extend .post-link-color1; }
+.post-link10 { @extend .post-link-color2; }
+.post-link11 { @extend .post-link-color3; }
+.post-link12 { @extend .post-link-color4; }
+.post-link13 { @extend .post-link-color5; }
+.post-link14 { @extend .post-link-color6; }
+.post-link15 { @extend .post-link-color1; }
+.post-link16 { @extend .post-link-color2; }
+
+a.post-link {
+  color: #fff;
+  padding: $spacing-unit*2 $spacing-unit;
+
+  > h2 {
+    margin: 0;
+    padding: 0;
+    padding-bottom: $spacing-unit;
+    border-bottom: solid 1px #fff;
+    line-height: 1.2em;
+  }
+}
+
 
 .post-meta {
     font-size: $small-font-size;
@@ -185,10 +315,9 @@
 
 .post-link {
     display: block;
+    color: #2980b9;
     font-size: 24px;
 }
-
-
 
 /**
  * Posts
@@ -238,4 +367,27 @@
 .footnotes {
     border-top: darkgray 1px solid;
     padding-top: 1em;
+}
+
+.vereador {
+  float: left;
+  width: 20%;
+
+  @include media-query($on-palm) {
+      width: 50%;
+  }
+
+  > div {
+    width: 120px;
+    height: 145px;
+    overflow: hidden;
+  }
+
+  > p {
+    margin: 5px;
+    font-size: 14px;
+    line-height: 16px;
+    height: 35px;
+    overflow: hidden;
+  }
 }

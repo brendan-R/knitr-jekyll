@@ -1,38 +1,33 @@
-# kntir-jekyll (with htmlwidgets)
+# Nossos Vereadores
 
-A fork of Yihui's superb [knitr-jekyll](https://github.com/yihui/knitr-jekyll) repo, tweaked to allow it to render [`htmlwidgets`](http://www.htmlwidgets.org/) output, using some additional [wrapper functions](https://github.com/brendan-R/brocks/blob/master/R/blog_stuff.R) from my [personal R package](https://github.com/brendan-R/brocks).
+## Dependências
+### Backend
 
-This blog-post explains the ins-and-outs of what's going on under the hood to make it all work: [brendanrocks.com/htmlwidgets-knitr-jekyll](http://brendanrocks.com/htmlwidgets-knitr-jekyll/).
-
-Note: This repo stores the source for posts in thier own subdirectories (e.g. `./_source/new-post/2015-12-07-new-post.Rmd`), which is purely my personal preference, but is slightly different to the original. This means that to get the blog generated/served, you might have more luck with `brocks::blog_gen()`/`brocks::blog_serve()` than the `servr::jekyll()` defaults.
-
-## Installation / Dependencies
-
-#### R Package Dependencies
-
-To get this repo working, you'll need the wrapper function `brocks::htmlwidgets_deps` in the `brocks` package. To render the example post featuring `htmlwidgets`, you'll also need those packages. Here's the lot:
-
-```r
-# Required for the htmlwidgets wrapper functions -----------------------------
-# install.packages("devtools")
-devtools::install_github("brendan-r/brocks")
-
-# For knitr-jekyll, and the htmlwidgets stuff --------------------------------
-install.packages(c(
-  "servr",
-  "knitr",
-  "metricsgraphics",
-  "leaflet",
-  "threejs",
-  "maps"
-))
+R (>3.3):
 
 ```
+# Necessário em máquinas ubuntu para instalar o R > 3.3
+echo 'deb http://cran.rstudio.com/bin/linux/ubuntu trusty/' | sudo tee /etc/apt/sources.list.d/vereadores.list
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 
-#### This repo
+sudo apt-get -y update
+sudo apt-get -y install r-base
 
-Clone with git, or just download as a .zip. From there, get editing!
+# necessários para alguns dos pacotes que instalaremos
+sudo apt-get -y install libcurl4-openssl-dev
+sudo apt-get -y install libpq-dev
+```
 
-## Getting blogging
-In addition to Yihui's post on how the system works, I wrote a little guide (with a gentle introduction to static site generation) here:  [brendanrocks.com/blogging-with-rmarkdown-knitr-jekyll](http://brendanrocks.com/blogging-with-rmarkdown-knitr-jekyll/).
+Todos os pacotes de R serão instalados assim que você abrir a primeira sessão R (o 'packrat' vai cuidar de tudo :)
 
+### Frontend
+
+> bundle install
+
+Servir via *RStudio*
+
+> brocks::blog_serve()
+
+Servir via *Linha de Comando*
+
+> Rscript -e 'brocks::blog_serve()'

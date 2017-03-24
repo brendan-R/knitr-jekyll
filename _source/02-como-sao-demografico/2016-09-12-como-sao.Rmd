@@ -1,0 +1,170 @@
+---
+layout: post
+title:  "Como são?"
+subtitle: Gênero, idade, grau de formação e ocupação
+published: true
+categories: [análise]
+tags: [demograficos, representatividade]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE)
+
+library(lubridate, warn.conflicts = F)
+library(dplyr, warn.conflicts = F)
+library(highcharter)
+library(stringr)
+library(DT)
+
+wd_anterior = getwd()
+setwd(Sys.getenv("VEREADOR_DIR"))
+source("vereadores_logic.R")
+source("data_access.R")
+source("server.R")
+setwd(wd_anterior) 
+
+camara_db <- start_camara_db()
+```
+
+
+```{r carrega, include=FALSE}
+vereadores = get_vereadores(camara_db) %>%
+  mutate(eleito = ifelse(
+    grepl("^ELEITO", desc_sit_tot_turno),
+    "Eleito",
+    "Suplente"
+    ),
+    sexo = descricao_sexo) 
+
+simpleCap <- function(x) {
+  s <- strsplit(x, " ")[[1]]
+  paste(toupper(substring(s, 1,1)), tolower(substring(s, 2)),
+      sep="", collapse=" ")
+}
+
+vereadores = vereadores %>% 
+  mutate_at(vars(matches("nome|desc|sexo")), function(x) sapply(x, simpleCap))
+```
+
+### Gênero, número e grau
+
+Infelizmente, **não há mulheres entre os 23 vereadores eleitos para a legislatura 2013-2016**. Todos são homens. Entre os suplentes que assumiram, três mulheres foram ou são vereadoras.
+
+Essa baixa representação feminina contrasta com uma cidade com 53% da população feminina e 54% de eleitoras. E essa disparidade acontece apesar de a lei exigir um mínimo de 30% de candidatas nos quadros dos partidos.
+
+<!-- População feminina de CG = 52,7% de acordo com o Censo 2010 (IBGE) -->
+
+```{r vereador_genero, echo=FALSE}
+sumario <- count(vereadores, eleito, sexo) %>% ungroup()
+sumario = rbind(sumario, ## TODO substituir isso por expand.grid
+                data.frame(sexo = c("Feminino"), 
+                           eleito = c("Eleito"), 
+                           n = c(0))) 
+
+sumario = arrange(sumario, c(1, 3, 4, 2)) 
+  
+p = hchart(sumario, "column", x = eleito, y = n, group = sexo) %>% 
+  hc_yAxis(title = "") %>% 
+  hc_xAxis(title = "") %>% 
+  hc_title(text = "Vereadores eleitos e suplentes por gênero")
+p
+```
+
+A maioria dos nossos representantes na câmara tem em torno de 50 anos, apenas dois vereadores com menos de 30 anos (Anderson Maia e Bruno Cunha Lima) e um com mais de 70 (Orlandino Farias).
+
+<!-- 13648 + 8921 -->
+
+```{r vereador_idade}
+idades = 2016 - year(dmy(vereadores$data_nascimento))
+hchart(idades, color = "#B71C1C", name = "Idade") %>% 
+  hc_yAxis(title = "Quantidade nessa faixa") %>% 
+  hc_xAxis(title = "Faixa etária")
+```
+
+Quanto à escolaridade, um terço dos vereadores desta legislatura tem curso superior completo. O grau de escolaridade mais comum é o ensino médio completo, representando 45% do total.
+
+```{r vereador_formacao}
+sumario <- vereadores %>% 
+  mutate(
+    descricao_grau_instrucao = ifelse(
+      descricao_grau_instrucao == "Ensino Médio Incompleto",
+      "Ensino Fundamental Completo",
+      ifelse(
+        descricao_grau_instrucao == "Superior Incompleto",
+        "Ensino Médio Completo",
+        descricao_grau_instrucao
+      )
+    )
+  ) %>% 
+  count(eleito, descricao_grau_instrucao) %>% ungroup()
+
+sumario = arrange(sumario, c(12, 11, 13, 14 , 2, 1, 3, 4))
+
+p = hchart(sumario, "column", x = descricao_grau_instrucao, y = n, group = eleito) %>% 
+  hc_plotOptions(column = list(stacking = "normal")) %>% 
+  hc_yAxis(title = "") %>% 
+  hc_xAxis(title = "") %>% 
+  hc_colors(c("darkblue", "orange"))
+  # hc_add_theme(hc_theme_smpl())
+p
+```
+
+### Ocupação
+
+Já quanto à ocupação que nossos representantes municipais declararam quando se candidataram, há uma tendência clara. A ocupação mais comum dos candidatos é… vereador. Embora vereador não seja uma profissão, e adotar a política como profissão não seja bem visto, uma parte dessas respostas pode se dever ao fato de que os vereadores tipicamente tentam reeleição. Em 2016, 21 dos 23 tentam, por exemplo.
+
+```{r vereador_ocupacao}
+sumario <- vereadores %>% 
+  count(descricao_ocupacao) %>% 
+  arrange(-n) %>% 
+  rename(`Ocupação` = descricao_ocupacao, `Quantos` = n )
+
+datatable(sumario, options = list(paging = F, info = F, searching = F), rownames = FALSE)
+```
+
+### Partido
+
+Idealmente, os partidos representam os ideais de grupos políticos. Durante as eleições, esses partidos fazem também coligações para juntar força na mídia e, de novo idealmente, fortalecer um projeto conjunto. Na política municipal, os ideais nem sempre estão tão claros. Vejamos como é em Campina.
+
+Clicando nas coligações na figura abaixo você pode explorar a distribuição dos partidos dos vereadores eleitos: 
+
+```{r vereador_partido, include=FALSE}
+library(treemap)
+
+v = vereadores %>% 
+  filter(eleito == "Eleito") %>% 
+  count(nome_legenda, sigla_partido)
+
+tm <- treemap(v, index = c("nome_legenda", "sigla_partido"),
+              vSize = "n", vColor = "nome_legenda")
+```
+```{r vereador_partido_treemap, results='asis'}
+hc_tm <- highchart() %>% 
+  hc_add_series_treemap(tm, allowDrillToNode = TRUE,
+                       layoutAlgorithm = "squarified",
+                       name = "tmdata") %>% 
+  hc_title(text = "Eleitos por coligação e partido") %>% 
+  hc_tooltip(pointFormat = "<b>{point.name}</b>:<br>
+             Eleitos: {point.value:,.0f}")
+
+hc_tm 
+```
+
+O partido com maior número de eleitos é o PMDB. Em segundo lugar, com três candidatos temos o PSDB e curiosamente o PMN, o Partido da Mobilização Nacional, um partido que não tem deputados estaduais ou federais na Paraíba. Outros pontos que merecem observação na composição da câmara são a ausência do PT, e a coligação de partidos que são opostos no cenário nacional, como o PSC (Partido de Jair Bolsonaro) e PC do B. 
+
+Confira os partidos de todos os eleitos:
+
+```{r vereador_partido_coligacao}
+vereadores %>% 
+  filter(eleito == "Eleito") %>% 
+  select(nome_urna_candidato, sigla_partido, nome_legenda) %>% 
+  mutate(nome_legenda = nome_legenda %>% 
+           str_replace_all("Iii", "III") %>% 
+           str_replace_all("Ii", "II")) %>% 
+  arrange(nome_legenda, sigla_partido) %>%
+  rename("Eleito" = nome_urna_candidato, "Partido" = sigla_partido, "Coligação" = nome_legenda) %>% 
+  datatable(options = list(paging = F, info = F), rownames = FALSE)
+```
+<br/>
+
+Um ponto importante: esses são os partidos dos eleitos. A organização partidária da Câmara mudou completamente em 2016. Confira em [Qual o seu partido?]({{ "/2016/09/qual-o-seu-partido.html" | prepend: site.baseurl }}).

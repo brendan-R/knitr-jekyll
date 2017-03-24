@@ -1,0 +1,354 @@
+---
+layout: post
+title: "Por que se afastou?"
+subtitle: "Entendendo a saída de titulares para entrada de reservas"
+published: true
+categories: [análise]
+tags: [suplência, tempo de trabalho]
+---
+
+```{r load, include=FALSE} 
+knitr::opts_chunk$set(screenshot.force = FALSE, echo = FALSE, fig.width=12) 
+
+library(lubridate, warn.conflicts = F, quietly = T)
+library(dplyr, warn.conflicts = F, quietly = T)
+library(magrittr, warn.conflicts = F, quietly = T)
+library(RPostgreSQL, warn.conflicts = F, quietly = T)
+library(ggplot2, warn.conflicts = F, quietly = T)
+library(readr)
+library(stringr)
+
+theme_set(theme_bw(18))
+
+# READ CSVs com Afastamento e Path pra Imagens
+vereadores_afast_posses = read_csv("vereadores_2012_afastamentos_posses.csv",
+                                  col_types = cols(.default = col_character())) %>% 
+    mutate(data_afastamento = dmy(data_afastamento),
+           data_retorno = dmy(data_retorno),
+           sequencial_cand_afastado = as.numeric(sequencial_cand_afastado),
+           sequencial_cand_suplente = as.numeric(sequencial_cand_suplente)) %>% 
+    arrange(data_afastamento)
+
+veread_eleitos_img = read_csv("vereadores_2012_eleitos_img-vector.csv",
+                              col_names = c("vereador", "img_path"),
+                              col_types = cols(.default = col_character())) %>% 
+    left_join(vereadores_afast_posses %>% 
+                  select(sequencial_cand_afastado, vereador_afastado) %>% 
+                  distinct(), by = c("vereador" = "vereador_afastado"))
+
+afastados_img = veread_eleitos_img %>% 
+    filter(!is.na(sequencial_cand_afastado))
+
+suplentes_img = read_csv("vereadores_2012_suplentes_img-vector.csv",
+                              col_names = c("vereador_suplente", "img_path"),
+                              col_types = cols(.default = col_character()))
+
+
+### Read Ementas no Tempo
+StartCamaraDB <- function(port = 5432, host = "localhost") {
+    cat("Creating Postgres Connection")
+    postgres_user = Sys.getenv("POSTGRES_USER")
+    postgres_pass = Sys.getenv("POSTGRES_PASS")
+    src_postgres(
+        dbname = "camara_db",
+        user = postgres_user,
+        password = postgres_pass,
+        port = port,
+        host = host
+    )
+}
+
+camara_db = if (!exists("camara_db")) StartCamaraDB() else camara_db
+
+ementas_vereadores = tbl(camara_db, sql(
+    "SELECT cons_cand.sequencial_candidato, 
+            cons_cand.nome_urna_candidato,
+            cons_cand.nome_legenda AS nome_coligacao,
+            cons_cand.desc_sit_tot_turno AS situacao_eleicao,
+            ement_cand.published_date,
+            date_trunc('month', ement_cand.published_date) as published_month
+    FROM map_ementa_candidato ement_cand, ementas, consulta_cand cons_cand
+    WHERE ement_cand.ementa_id = ementas.ementa_id and 
+          ement_cand.sequencial_candidato = cons_cand.sequencial_candidato and
+          ementas.situation = 'APROVADO' and
+          cons_cand.ano_eleicao = 2012 and
+          cons_cand.descricao_cargo = 'VEREADOR'
+    ORDER BY cons_cand.ano_eleicao, cons_cand.nome_urna_candidato")) %>% 
+    collect() %>% 
+    mutate(published_year = year(published_date),
+           nome_situacao_candidato = ifelse(situacao_eleicao == "SUPLENTE", 
+                                            paste0(str_replace(nome_urna_candidato, " ", "\n"), "\n(SUPLENTE)"),
+                                            str_replace(nome_urna_candidato, " ", "\n")))
+
+ementas_por_mes = ementas_vereadores %>% 
+    count(sequencial_candidato, nome_situacao_candidato, nome_coligacao, published_year, published_month) %>% 
+    ungroup()
+
+legendas = tbl(camara_db, sql("select nome_coligacao, sigla_partido 
+    from consulta_legendas 
+    where ano_eleicao = 2012 and nome_ue = 'CAMPINA GRANDE' and descricao_cargo = 'VEREADOR' 
+    order by 1, 2")) %>%
+    collect()
+```
+
+```{r funcs}
+
+vereador_div_sprintf = function(img_src, alt, paragraph){
+    sprintf("<div class='vereador'><div><img src='%s\' alt = '%s' width='100%%'/></div><p>%s</p></div>",
+            img_src, alt, paragraph)
+}
+
+vereadores2list = function(vereadores){
+    resposta = ""
+    for (v in 1:NROW(vereadores)) {
+        resposta = paste(resposta, 
+                         vereador_div_sprintf(
+                             vereadores$img_path[v],
+                             vereadores$vereador[v],
+                             ifelse(!is.na(vereadores$sequencial_cand_afastado[v]), 
+                                    sprintf("<b style='color: red;'>%s</b>", vereadores$vereador[v]),
+                                    vereadores$vereador[v])))
+    }
+    resposta
+}
+
+```
+
+
+### Quem se afastou?
+
+Como falamos no post [Quem são?]({{ "/2016/09/quem-sao.html" | prepend: site.baseurl }}) apesar de elegermos vereadores acreditando na sua capacidade em legislar, muitos se afastam alegando projetos secundários. Dos 23 eleitos, mais da metade passou pelo menos 4 meses afastado da Câmara.
+
+Vejam abaixo os <font color='red'><b>13 vereadores</b></font> com casos de afastamento.
+
+```{r vereadores_titulares, results='asis'}
+cat(vereadores2list(veread_eleitos_img))
+```
+
+<br style="clear: left;"/>
+
+### Casos de Afastamento e Posse de 2013 à 2016
+
+Contamos a seguir as histórias dos vereadores que se afastaram da Cãmara e quem foi empossado em ordem cronológica durante o mandato. Aproveitamos também para questionar a produtividade em termos do número de ementas dos vereadores titulares vs. seus suplentes.
+
+```{r aux_func}
+MesAno = function(date_val){
+    meses = c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+    paste0(meses[month(date_val)], "/", year(date_val))
+}
+
+DiaMesAno = function(date_val){
+    paste0(str_pad(day(date_val), 2, 'left', 0), "/", MesAno(date_val))
+}
+
+PrintTitularSuplenteImgs = function(afastados_img, veread_afast_posses, v){
+    vereador_img = afastados_img %>% filter(vereador == v)
+    vereador_suplentes_img = suplentes_img %>% inner_join(veread_afast_posses, by = "vereador_suplente") %>% arrange(data_afastamento)
+
+    cat(vereador_div_sprintf(vereador_img$img_path[1], vereador_img$vereador[1],
+                             sprintf("<span style='color: red;'>%s</span>", vereador_img$vereador[1])))
+    cat(vereador_div_sprintf(vereador_suplentes_img$img_path, vereador_suplentes_img$vereador_suplente, 
+                             sprintf("<span style='color: green;'>%s</span>", vereador_suplentes_img$vereador_suplente)))
+}
+
+PlotEmentasPorMes = function(ementas_por_mes, veread_afast_posses, v){
+    eleito_por_mes = ementas_por_mes %>% 
+        filter(sequencial_candidato == veread_afast_posses$sequencial_cand_afastado[1])
+    suplentes_por_mes = ementas_por_mes %>% 
+                      semi_join(veread_afast_posses, by = c("sequencial_candidato" = "sequencial_cand_suplente"))
+
+    eleito_suplentes_count_mes = bind_rows(eleito_por_mes, suplentes_por_mes) %>%
+        mutate(nome_situacao_candidato = factor(nome_situacao_candidato, 
+                                                levels = c(unique(eleito_por_mes$nome_situacao_candidato),
+                                                           unique(suplentes_por_mes$nome_situacao_candidato)))) %>% 
+        select(nome_situacao_candidato, published_year, published_month, n) %>% 
+        mutate(published_month = as.POSIXct(published_month))
+
+    ggplot(eleito_suplentes_count_mes,
+           aes(x = as.POSIXct(published_month), fill = nome_situacao_candidato)) +
+        geom_bar(aes(y = n), stat = "identity") +
+        scale_x_datetime(date_labels = "%m", date_breaks = "2 months") +
+        facet_grid(nome_situacao_candidato~published_year, scales = "free_x") +
+        labs(x = "Mês", y = "Nº de Ementas", fill = "Vereador") +
+        theme(legend.position = "none", strip.text.y = element_text(angle = 0))
+}
+
+```
+
+#### Caso TOVAR
+
+```{r tovar_imgs, results='asis'}
+v = 'TOVAR - PSDB'
+tovar_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+
+PrintTitularSuplenteImgs(afastados_img, tovar_afast_posses, v)
+```
+
+Tovar foi um dos vereadores que menos tempo passou na Câmara após ser eleito. Logo no início do mandato, no dia **`r DiaMesAno(tovar_afast_posses$data_afastamento[1])`** ele se afasta para exercer a função de Chefe de Gabinete do prefeito. Nesse momento entra em cena Ivonete Ludgério (PSB), uma das figuras mais intrigantes desse mandato, a qual toma posse e mesmo sendo suplente alcança o feito de permanecer na Câmara durante todo o mandato. Um pouco mais de um ano depois em **`r MesAno(tovar_afast_posses$data_retorno[1])`** Tovar retorna a Câmara alegando o desejo de candidatar-se a Deputado Estadual nas eleições de 2014. Ivonete se afasta mas no mesmo dia é empossada novamente com a saída de Jóia Germano (ver abaixo). 
+
+Os planos de Tovar se tornam realidade e em **`r MesAno(tovar_afast_posses$data_afastamento[2])`** ele se despede da Câmara Municipal seguindo para o legislativo estadual. Nesse ínterim, Anderson Maia (PSB) é empossado definitivamente como o mais novo vereador titular de Campina Grande, tendo demonstrado uma produtividade mensal diferenciada quando comparado com o próprio Tovar ou com Ivonete Ludgério que, por sua vez, foi pouco atuante na Câmara durante o mandato.
+
+```{r ementa_tempo_tovar}
+PlotEmentasPorMes(ementas_por_mes, tovar_afast_posses)
+```
+
+#### Caso LAFITE
+```{r lafite_imgs, results='asis'}
+v = 'LAFITE - PSC'
+lafite_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, lafite_afast_posses, v)
+```
+O vereador Hercules Lafite de Lafontaine Jinkings Júnior, mais conhecido por Lafite, assume a Secretaria de Ciência e Tecnologia em **`r MesAno(lafite_afast_posses$data_afastamento[1])`** pouco mais de um ano após o início do mandato. Fica afastado por praticamente 2 anos (até **`r MesAno(lafite_afast_posses$data_retorno[1])`**) quando decide retomar a atividade na Câmara para garantir sua reeleição em 2016. Durante esse período o vereador Aldo Cabral do PC do B assume a vereança com um rendimento bem abaixo do seu antecessor.
+
+```{r lafite_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, lafite_afast_posses)
+```
+
+#### Caso LULA CABRAL
+```{r lula_imgs, results='asis'}
+v = 'LULA CABRAL - PRB'
+lula_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, lula_afast_posses, v)
+```
+No mesmo dia que o vereador Lafite foi chamado, Lula Cabral também o foi, nesse caso Lula seguiu para o cargo de Secretário de Cultura. Novamente reforçando o executivo e enfraquecendo o legislativo eleito pelo povo. Nesse período o vereador conhecido por Pastor Josimar do PRB assume o cargo e tenta fazer o seu melhor, mesmo assim vemos que a partir de Setembro de 2014 o rendimento dele cai chegando próximo de zero no mês de sua saída em **`r MesAno(lula_afast_posses$data_retorno[1])`**. Lula Cabral retorna também alegando vontade de reeleger-se em 2016. 
+
+```{r lula_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, lula_afast_posses)
+```
+
+#### Caso JOIA GERMANO
+```{r joia_imgs, results='asis'}
+v = 'JOIA GERMANO - PRP'
+joia_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, joia_afast_posses, v)
+```
+
+Joia Germano é mais um dos vereadores da coligação *Por Amor a Campina I* (PSB, PRP, PSDB e PSD) que se afasta da Câmara para exercer cargos no executivo. E dessa vez entra novamente na história Ivonete Ludgério. 
+
+Como falamos anteriormente, em **`r MesAno(tovar_afast_posses$data_retorno[1])`** Tovar retorna para a Câmara alegando desejo de eleger-se Deputado Estadual, nesse momento Ivonete deveria retornar para a reserva, no entanto, o prefeito Romero Rodrigues convoca imediatamente Jóia Germano para exercer a Chefia de Gabinete (da mesma coligação que Tovar e Ivonete). Com isso Ivonete Ludgério (diga-se de passagem, a líder do governo na Câmara) se mantém na Câmara agora como suplente de Jóia Germano. 
+
+Com o sucesso na campanha do vereador Tovar, Bruno Cunha Lima e Inácio Falcão (todos do PSDB) para os cargos de Deputados Estaduais, no dia **`r MesAno(joia_afast_posses$data_retorno[1])`**, Ivonete Ludgério torna-se vereadorada titular da Câmara e Aragão Júnior toma seu lugar na suplência de Jóia Germano. Que seguindo os passos de Tovar e Lula Cabral, retorna à Câmara em **`r MesAno(joia_afast_posses$data_retorno[2])`** no último dia permitido para quem deseja se candidatar em 2016. 
+
+Além de toda essa história "enrolada", encontramos um fato bem intrigante com esses três vereadores: o **baixo rendimento mensal de ementas**. Quando comparamos com outros vereadores vemos que estão bem aquém da média. Jóia Germano só passou de 20 ementas por mês duas vezes, Ivonete Ludgério nunca chegou a 20 e Aragão Júnior teve menos de 10 ementas aprovadas em todos os meses de sua vereança!
+
+```{r joia_ementa_tempo}
+PlotEmentasPorMes(ementas_por_mes, joia_afast_posses) 
+```
+
+#### Caso GALEGO DO LEITE
+```{r galego_imgs, results='asis'}
+v = 'GALEGO DO LEITE - PMN'
+galego_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, galego_afast_posses, v)
+```
+Galego do Leite afastou-se por 121 dias (de **`r DiaMesAno(galego_afast_posses$data_afastamento[1])`** à **`r DiaMesAno(galego_afast_posses$data_retorno[1])`**) para resolver assuntos pessoais e enquanto isso Saulo Germano também do PMN toma posse e dá uma razoável contribuição para a Cãmara Municipal mesmo ficando poucos meses no mandato.
+
+```{r galego_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, galego_afast_posses)
+```
+
+#### Caso RODRIGO RAMOS
+```{r rodrigo_imgs, results='asis'}
+v = 'RODRIGO RAMOS - PMN'
+rodrigo_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, rodrigo_afast_posses, v)
+```
+O vereador Rodrigo Ramos também afastou-se para resolver assuntos pessoais por 121 dias no final 2014 até o início de 2015. Nesse período assume a segunda suplente do PMN (partido isolado nas eleições de 2012) e **segunda mulher** a exercer a vereança nesse mandato, Lourdes da Costa, a qual tem uma participação exemplar e diferentemente de vários outros titulares e suplentes aprova 40 ementas no mês de Novembro e quase 30 no mês de Dezembro! Rendimento muito acima do próprio Rodrigo Ramos que mal alcançou 10 ementas por mês. 
+
+```{r rodrigo_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, rodrigo_afast_posses)
+```
+
+#### Caso BUCHADA
+```{r buchada_imgs, results='asis'}
+v = 'BUCHADA - PTN'
+buchada_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, buchada_afast_posses, v)
+```
+A **terceira (e última) mulher** vereadora a tomar posse no mandato 2013-2016 foi Tia Mila do PV que substituiu o vereador Buchada entre os meses de **`r DiaMesAno(buchada_afast_posses$data_afastamento[1])`** e **`r DiaMesAno(buchada_afast_posses$data_retorno[1])`**. Buchada sai por 121 dias alegando assuntos pessoais e Tia Mila tem um rendimento consistente aprovando mais de 20 ementas por mês, até mesmo depois de sua saída em Março e Maio de 2015.
+
+```{r buchada_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, buchada_afast_posses)
+```
+
+#### Caso SAULO NORONHA
+```{r saulo_imgs, results='asis'}
+v = 'SAULO NORONHA - DEM'
+saulo_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, saulo_afast_posses, v)
+```
+Saulo Noronha afasta-se para assumir a presidência da Urbema e Miguel da Construção em assume **`r DiaMesAno(saulo_afast_posses$data_afastamento[1])`** e trabalha por quase 1 ano até o dia **`r DiaMesAno(saulo_afast_posses$data_retorno[1])`**. Agindo fortemente no primeiro mês como se tivesse acumulado ementas, mas mantendo uma performance variável no mandato, por exemplo, sofreu fortemente o impacto do recesso no início e no meio do ano de 2015. 
+
+```{r saulo_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, saulo_afast_posses)
+```
+
+#### Caso INÁCIO FALCÃO
+```{r inacio_imgs, results='asis'}
+v = 'INÁCIO FALCÃO - PSDB'
+inacio_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, inacio_afast_posses, v)
+```
+Com Inácio Falcão termina a história de Ivonete Ludgério na Câmara. Como já dissemos anteriormente, ele é eleito Deputado Estadual e ela assume como Vereadora Titular em **`r DiaMesAno(inacio_afast_posses$data_afastamento[1])`**. Ironicamente, um pouco mais de 1 ano depois de tornar-se titular, a ex-suplente Ivonete Ludgério afasta-se voluntariamente da Câmara por alguns meses alegando motivos pessoais...
+
+E novamente, vemos Inácio Falcão como mais um vereador do PSDB a manter o rendimento padrão dos vereadores do partido, tendo menos de 20 ementas aprovadas na maioria dos meses. 
+
+```{r inacio_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, inacio_afast_posses)
+```
+
+#### Caso BRUNO CUNHA LIMA
+```{r bruno_imgs, results='asis'}
+v = 'BRUNO CUNHA LIMA - PSDB'
+bruno_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, bruno_afast_posses, v)
+```
+Bruno Cunha Lima foi o terceiro dessa lista de casos de afastamento, juntamente com Tovar e Inácio Falcão, a usar a Câmara Municipal como palanque para alcançar a legislatura estadual. No caso dele essa escalada acontece em tempo recorde, somando apenas 24 anos de idade e 2 anos de experiência política! Nesses 2 anos de trabalho houveram meses de altíssimo rendimento alcançando 80 ementas em um único mês, distoando completamente dos seus pares no PSDB, e meses com rendimentos próximo a zero.
+
+No dia **`r DiaMesAno(bruno_afast_posses$data_afastamento[1])`** Bruno Cunha Lima deixa definitivamente a Câmara Municipal e João Dantas do PSD assume seu posto.
+
+```{r bruno_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, bruno_afast_posses)
+```
+
+#### Caso MARINALDO CARDOSO
+```{r marinaldo_imgs, results='asis'}
+v = 'MARINALDO CARDOSO - PRB'
+marinaldo_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, marinaldo_afast_posses, v)
+```
+O vereador Marinaldo Cardoso tem seu pedido de licença aceito e afasta-se por 121 dias, do mês **`r MesAno(marinaldo_afast_posses$data_afastamento[1])`** ao mês **`r MesAno(marinaldo_afast_posses$data_retorno[1])`**. Dando espaço para que Rostand Paraíba do PRB assine seu nome em algumas poucas ementas aprovadas na Câmara Municipal de Campina Grande.
+
+```{r marinaldo_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, marinaldo_afast_posses)
+```
+
+#### Caso METUSELA AGRA
+```{r metusela_imgs, results='asis'}
+v = 'METUSELA AGRA - PMDB'
+metusela_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, metusela_afast_posses, v)
+```
+Metuselá Agra é mais um vereador a aceitar a convocação para cargos no executivo, sendo dessa vez chamado pelo governador para o cargo de Secretário Executivo de Desenvolvimento Humano do estado em **`r MesAno(metusela_afast_posses$data_afastamento[1])`**. Até o início do ano de 2016, quando Metuselá retoma o cargo para buscar a reeleição em 2016, Rodolfo Rodrigues assume a vereança. No entanto, não encontramos ementa alguma do suplente nos 7 meses de mandato do ano de 2015 e em 2016 apenas 6 ementas. Apesar da estranheza, reforçamos que essa base de dados está publicamente disponível e é mantida pela própria Câmara Municipal ([ver sistema](http://187.115.174.90:8080/ScanLexWeb/))
+
+```{r metusela_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, metusela_afast_posses)
+```
+
+#### Caso SGT REGIS
+```{r sgt_imgs, results='asis'}
+v = 'SGT REGIS - PMN'
+sgt_afast_posses = vereadores_afast_posses %>% filter(vereador_afastado == v)
+PrintTitularSuplenteImgs(afastados_img, sgt_afast_posses, v)
+```
+Por fim, temos o caso do Sgt Regis do PMN que assume a Presidência da AMDE em meados de **`r MesAno(sgt_afast_posses$data_afastamento[1])`** mais uma vez aproveitando mesmo que por pouco tempo, cargos no executivo e dando brecha para outros correligionários participarem da bancada da Câmara. Dessa vez Alcindor Villarim assume seu posto com um rendimento bem abaixo do que a população campinense espera de um vereador.
+
+```{r sgt_ementa_tempo, fig.height=5}
+PlotEmentasPorMes(ementas_por_mes, sgt_afast_posses)
+```
+
+Diante de todas essas histórias concluimos com algumas perguntas para respondermos individualmente:
+
+* Quando votamos para vereadores estamos elegendo pessoas para trabalhar na Câmara ou nos cargos executivos do governo?
+* Os vereadores que elegemos realmente gostam de ser vereadores de Campina Grande ou estão usando esse cargo apenas como patamar para posições políticas mais privilegiadas?
+
